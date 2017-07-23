@@ -27,6 +27,7 @@ Node<type>::Node(type* value)
 template <typename type>
 Node<type>::~Node()
 {
+	//delete this->_value;
 }
 
 template <typename type>

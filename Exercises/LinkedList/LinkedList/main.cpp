@@ -32,16 +32,32 @@ int main()
 
 	//cout << linkedNotes.First()->Next()->Value() << endl;
 
-	LinkedList<Command> linkedNodes = LinkedList<Command>();
+	//LinkedList<Command> linkedNodes = LinkedList<Command>();
 
-	Command command = Command('u', 2, 14);
-	Command command2 = Command('d', 4, 23);
+	//Command command = Command('u', 2, 14);
+	//Command command2 = Command('d', 4, 23);
 
-	linkedNodes.AddTail(&command);
+	//linkedNodes.AddTail(&command);
 
-	linkedNodes.AddTail(&command2);
+	//linkedNodes.AddTail(&command2);
 
-	cout << linkedNodes.Head()->Next()->Value()->getDestination() << endl;
+	//cout << linkedNodes.Head()->Next()->Value()->getDestination() << endl;
+
+	LinkedList<Command> nodes;
+
+	Command command = Command('a', 1, 1);
+	Command command2 = Command('b', 2, 2);
+	Command command3 = Command('c', 3, 3);
+
+	nodes.AddTail(&command);
+	nodes.AddTail(&command2);
+	nodes.AddTail(&command3);
+
+	Node<Command>* nodeToRemove = nodes.Head()->Next();
+
+	nodes.Remove(nodeToRemove);
+
+	cout << nodes.Head()->Next()->Value()->getTime() << endl;
 
 	return 0;
 }

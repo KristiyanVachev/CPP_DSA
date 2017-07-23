@@ -13,6 +13,7 @@ public:
 
 	Node<type>* Head();
 	void AddTail(type* data);
+	void Remove(Node<type>* node);
 };
 
 template <typename type>
@@ -47,5 +48,39 @@ void LinkedList<type>::AddTail(type* data)
 	{
 		this->_tail->SetNext(newNode);
 		this->_tail = newNode;
+	}
+}
+
+template <typename type>
+void LinkedList<type>::Remove(Node<type>* node)
+{
+	if (node == this->Head())
+	{
+		this->_head = this->Head()->Next();
+		delete node;
+		return;
+	}
+
+	Node<type>* currentNode = this->Head();
+
+	while (currentNode->Next() != nullptr)
+	{
+		if (currentNode->Next() == node)
+		{
+			if (node == this->_tail)
+			{
+				this->_tail = currentNode;
+				currentNode->SetNext(nullptr);
+			}
+			else
+			{
+				currentNode->SetNext(node->Next());
+			}
+
+			delete node;
+			return;
+		}
+
+		currentNode = currentNode->Next();
 	}
 }
