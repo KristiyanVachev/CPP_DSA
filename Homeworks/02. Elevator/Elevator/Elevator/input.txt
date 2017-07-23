@@ -1,0 +1,11 @@
+10 10
+call down 5 1
+call up 5 6
+go 2 7
+go 8 9
+call up 4 10
+go 2 12
+go 10 13
+call down 5 16
+go 1 18
+go 8 19
