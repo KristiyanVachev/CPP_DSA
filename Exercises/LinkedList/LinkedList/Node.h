@@ -4,21 +4,21 @@ template <typename type> class Node
 {
 private:
 	Node<type>* _nextNode;
-	type _value;
+	type* _value;
 
 public:
-	Node<type>(type value);
+	Node<type>(type* value);
 	~Node();
 
-	void SetValue(type value);
+	void SetValue(type* value);
 	void SetNext(Node<type>* nextNode);
 
 	Node<type>* Next();
-	type Value();
+	type* Value();
 };
 
 template <class type>
-Node<type>::Node(type value)
+Node<type>::Node(type* value)
 {
 	_value = value;
 	_nextNode = nullptr;
@@ -30,7 +30,7 @@ Node<type>::~Node()
 }
 
 template <typename type>
-void Node<type>::SetValue(type value)
+void Node<type>::SetValue(type* value)
 {
 	this->_value = value;
 }
@@ -48,7 +48,7 @@ Node<type>* Node<type>::Next()
 }
 
 template <typename type>
-type Node<type>::Value()
+type* Node<type>::Value()
 {
 	return this->_value;
 }

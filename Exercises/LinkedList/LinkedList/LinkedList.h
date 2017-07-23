@@ -4,22 +4,22 @@
 template <typename type> class LinkedList
 {
 private:
-	Node<type>* _first;
-	Node<type>* _last;
+	Node<type>* _head;
+	Node<type>* _tail;
 
 public:
 	LinkedList();
 	~LinkedList();
 
-	Node<type>* First();
-	void AddLast(Node<type>* node);
+	Node<type>* Head();
+	void AddTail(type* data);
 };
 
 template <typename type>
 LinkedList<type>::LinkedList()
 {
-	this->_first = nullptr;
-	this->_last = nullptr;
+	this->_head = nullptr;
+	this->_tail = nullptr;
 }
 
 template <typename type>
@@ -28,22 +28,24 @@ LinkedList<type>::~LinkedList()
 }
 
 template <typename type>
-Node<type>* LinkedList<type>::First()
+Node<type>* LinkedList<type>::Head()
 {
-	return this->_first;
+	return this->_head;
 }
 
 template <typename type>
-void LinkedList<type>::AddLast(Node<type>* node)
+void LinkedList<type>::AddTail(type* data)
 {
-	if (this->_first == nullptr)
+	Node<type>* newNode = new Node<type>(data);
+
+	if (this->_head == nullptr)
 	{
-		this->_first = node;
-		this->_last = node;
+		this->_head = newNode;
+		this->_tail = newNode;
 	}
 	else
 	{
-		this->_last->SetNext(node);
-		this->_last = node;
+		this->_tail->SetNext(newNode);
+		this->_tail = newNode;
 	}
 }

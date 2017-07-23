@@ -3,32 +3,46 @@
 
 #include "stdafx.h"
 #include "iostream"
+
 #include "Node.h"
 #include "LinkedList.h"
+#include "Command.h"
 
 using namespace std;
 
 int main()
 {
-	Node<int> node = Node<int>(2);
-	Node<int> nodetwo = Node<int>(4);
+	//Node<int> node = Node<int>(2);
+	//Node<int> nodetwo = Node<int>(4);
 
-	node.SetNext(&nodetwo);
+	//node.SetNext(&nodetwo);
 
-	cout << node.Value() << endl;
-	cout << node.Next()->Value() << endl;
+	//cout << node.Value() << endl;
+	//cout << node.Next()->Value() << endl;
 
-	if (node.Next()->Next() == nullptr)
-	{
-		cout << "koala" << endl;
-	}
+	//if (node.Next()->Next() == nullptr)
+	//{
+	//	cout << "koala" << endl;
+	//}
 
-	LinkedList<int> linkedNotes = LinkedList<int>();
+	//LinkedList<int> linkedNotes = LinkedList<int>();
 
-	linkedNotes.AddLast(&node);
+	//linkedNotes.AddLast(&node);
+	//linkedNotes.AddLast(&nodetwo);
 
-	cout << linkedNotes.First()->Value() << endl;
+	//cout << linkedNotes.First()->Next()->Value() << endl;
 
-    return 0;
+	LinkedList<Command> linkedNodes = LinkedList<Command>();
+
+	Command command = Command('u', 2, 14);
+	Command command2 = Command('d', 4, 23);
+
+	linkedNodes.AddTail(&command);
+
+	linkedNodes.AddTail(&command2);
+
+	cout << linkedNodes.Head()->Next()->Value()->getDestination() << endl;
+
+	return 0;
 }
 
