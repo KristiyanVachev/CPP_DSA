@@ -27,6 +27,7 @@ Node<type>::Node(type* value)
 template <typename type>
 Node<type>::~Node()
 {
+	//TODO: Delete only if value is initialized with new.
 	//delete this->_value;
 }
 

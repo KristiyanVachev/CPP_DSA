@@ -43,21 +43,27 @@ int main()
 
 	//cout << linkedNodes.Head()->Next()->Value()->getDestination() << endl;
 
-	LinkedList<Command> nodes;
+	////---Checking if LinkedList descturctor and .Remove works
+	if (true)
+	{
 
-	Command command = Command('a', 1, 1);
-	Command command2 = Command('b', 2, 2);
-	Command command3 = Command('c', 3, 3);
+		LinkedList<Command> nodes;
 
-	nodes.AddTail(&command);
-	nodes.AddTail(&command2);
-	nodes.AddTail(&command3);
+		Command* command = new Command('a', 1, 1);
+		Command command2 = Command('b', 2, 2);
+		Command* command3 = new Command('c', 3, 3);
 
-	Node<Command>* nodeToRemove = nodes.Head()->Next();
+		nodes.AddTail(command);
+		nodes.AddTail(&command2);
+		nodes.AddTail(command3);
 
-	nodes.Remove(nodeToRemove);
+		Node<Command>* nodeToRemove = nodes.Head()->Next();
 
-	cout << nodes.Head()->Next()->Value()->getTime() << endl;
+		nodes.Remove(nodeToRemove);
+
+		cout << nodes.Head()->Next()->Value()->getTime() << endl;
+	}
+
 
 	return 0;
 }
