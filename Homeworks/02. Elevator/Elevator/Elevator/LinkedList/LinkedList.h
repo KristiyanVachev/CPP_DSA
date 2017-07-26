@@ -26,20 +26,20 @@ LinkedList<type>::LinkedList()
 template <typename type>
 LinkedList<type>::~LinkedList()
 {
-	//if (this->Head() == nullptr)
-	//{
-	//	return;
-	//}
+	if (this->Head() == nullptr)
+	{
+		return;
+	}
 
-	//ListNode<type>* currNode = this->Head();
-	//ListNode<type>* nextNode;
+	ListNode<type>* currNode = this->Head();
+	ListNode<type>* nextNode;
 
-	//do
-	//{
-	//	nextNode = currNode->Next();
-	//	delete currNode;
-	//	currNode = nextNode;
-	//} while (nextNode != nullptr);	
+	do
+	{
+		nextNode = currNode->Next();
+		delete currNode;
+		currNode = nextNode;
+	} while (nextNode != nullptr);	
 }
 
 template <typename type>
