@@ -7,7 +7,8 @@ template <typename type> class OrderedHashQueue
 private:
 	bool _isAscending;
 	Node<type>* _head;
-	Node<type>* _tail;
+
+	void Remove();
 
 public:
 	OrderedHashQueue(bool isAscending);
@@ -15,7 +16,6 @@ public:
 
 	type Pop();
 	void Add(type data);
-	void Remove(Node<type>* node);
 };
 
 template <typename type>
@@ -23,7 +23,6 @@ OrderedHashQueue<type>::OrderedHashQueue(bool isAscending)
 {
 	this->_isAscending = isAscending;
 	this->_head = nullptr;
-	this->_tail = nullptr;
 }
 
 template <typename type>
@@ -49,7 +48,9 @@ template <typename type>
 type OrderedHashQueue<type>::Pop()
 {
 	type value = this->_head->Value();
-	this->Remove(this->_head);
+
+	this->Remove();
+	
 	return value;
 }
 
@@ -61,7 +62,6 @@ void OrderedHashQueue<type>::Add(type data)
 		Node<type>* newNode = new Node<type>(data);
 
 		this->_head = newNode;
-		//this->_tail = newNode;
 
 		return;
 	}
@@ -102,35 +102,10 @@ void OrderedHashQueue<type>::Add(type data)
 }
 
 template <typename type>
-void OrderedHashQueue<type>::Remove(Node<type>* node)
+void OrderedHashQueue<type>::Remove()
 {
-	if (node == this->_head)
-	{
-		this->_head = this->_head->Next();
-		delete node;
-		return;
-	}
+	Node<type>* node = this->_head;
 
-	Node<type>* currentNode = this->_head;
-
-	while (currentNode->Next() != nullptr)
-	{
-		if (currentNode->Next() == node)
-		{
-			if (node == this->_tail)
-			{
-				this->_tail = currentNode;
-				currentNode->SetNext(nullptr);
-			}
-			else
-			{
-				currentNode->SetNext(node->Next());
-			}
-
-			delete node;
-			return;
-		}
-
-		currentNode = currentNode->Next();
-	}
+	this->_head = this->_head->Next();
+	delete node;
 }

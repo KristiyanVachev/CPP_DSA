@@ -9,7 +9,7 @@ using namespace std;
 
 int main()
 {
-	OrderedHashQueue<int> queue = OrderedHashQueue<int>(false);
+	OrderedHashQueue<int> queue = OrderedHashQueue<int>(true);
 
 	queue.Add(6);
 	queue.Add(4);
