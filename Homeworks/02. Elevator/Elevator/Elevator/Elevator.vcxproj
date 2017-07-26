@@ -143,8 +143,10 @@
   <ItemGroup>
     <ClInclude Include="Command.h" />
     <ClInclude Include="Direction.h" />
-    <ClInclude Include="LinkedList.h" />
-    <ClInclude Include="Node.h" />
+    <ClInclude Include="LinkedList\LinkedList.h" />
+    <ClInclude Include="LinkedList\ListNode.h" />
+    <ClInclude Include="OrderedHashQueue\Node.h" />
+    <ClInclude Include="OrderedHashQueue\OrderedHashQueue.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />

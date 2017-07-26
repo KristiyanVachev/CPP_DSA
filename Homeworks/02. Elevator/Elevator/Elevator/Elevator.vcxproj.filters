@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\LinkedList">
+      <UniqueIdentifier>{ef747a68-f11f-43c5-ac66-389ac12f1c0c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\OrderedHashQueue">
+      <UniqueIdentifier>{93a51b82-c129-4d59-a9c7-30ab77313de5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -33,11 +39,17 @@
     <ClInclude Include="Command.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="LinkedList.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="OrderedHashQueue\Node.h">
+      <Filter>Header Files\OrderedHashQueue</Filter>
     </ClInclude>
-    <ClInclude Include="Node.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="OrderedHashQueue\OrderedHashQueue.h">
+      <Filter>Header Files\OrderedHashQueue</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkedList\LinkedList.h">
+      <Filter>Header Files\LinkedList</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkedList\ListNode.h">
+      <Filter>Header Files\LinkedList</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

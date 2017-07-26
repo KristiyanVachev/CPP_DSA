@@ -10,30 +10,106 @@
 
 #include "Direction.h";
 #include "Command.h"
-#include "LinkedList.h"
-#include "Node.h"
+#include "LinkedList/LinkedList.h"
+#include "LinkedList/ListNode.h"
+#include "OrderedHashQueue/OrderedHashQueue.h"
 
 using namespace std;
 
-LinkedList<Command> ReadInput(char argc, char* argv[]);
+LinkedList<Command>* ReadInput(char argc, char* argv[]);
 
 int main(char argc, char* argv[])
 {
 	//Read and parse commands
-	LinkedList<Command> commands = ReadInput(argc, argv);
+	LinkedList<Command>* commands = ReadInput(argc, argv);
 
-	Node<Command>* currNode = commands.First();
-	cout << currNode->Value()->getTime() << endl;
-	do
+	int currTime = 1;
+	int currFloor = 1;
+	std::stringstream output;
+
+	while (!(commands->Head() == nullptr))
 	{
-		currNode = currNode->Next();
-		cout << currNode->Value()->getTime() << endl;
-	} while (currNode->Next() != nullptr);
+		ListNode<Command>* currNode = commands->Head();
+		Command* currCommand = commands->Head()->Value();
+		int endDestination = currCommand->getDestination();
+		Direction currDirection = currFloor < endDestination ? Direction::up : Direction::down;
+
+		if (currTime < currCommand->getTime())
+		{
+			currTime = currCommand->getTime();
+		}
+
+		OrderedHashQueue<int> stops = OrderedHashQueue<int>(currDirection == up);
+
+		//Start by adding the first command
+		stops.Add(currCommand->getDestination());
+
+		//Gather stops en route
+		//Check for stops that could be executed with the first command
+		int timeBetweenFloors = abs(currFloor - endDestination) * 5;
+		int lastStopArrivingTime = currTime + timeBetweenFloors;
+
+		//Commands that are called before the end of the current command
+		while(currNode->Next() != nullptr && currNode->Next()->Value()->getTime() <= lastStopArrivingTime)
+		{
+			currNode = currNode->Next();
+
+			//get current floor depending on the time of currentCommand
+			double floorAtThisCommand = currFloor + abs(currNode->Value()->getTime() - currTime) * 0.2;
+
+			//depending on direction check if we're going to pass trough currCommand's floor and if we are not over the endDestination
+			//TODO Extract this monstrosity in bool variables
+			if (currDirection == up && floorAtThisCommand < currNode->Value()->getDestination() &&
+				currNode->Value()->getDestination() <= endDestination
+				||
+				currDirection == down && floorAtThisCommand > currNode->Value()->getDestination() &&
+				currNode->Value()->getDestination() >= endDestination)
+			{
+				if (currNode->Value()->getDirection() == currDirection || currNode->Value()->getDirection() == none)
+				{
+					stops.Add(currNode->Value()->getDestination());
+				}
+			}
+		}
+
+		while (!stops.IsEmpty())
+		{
+			int lastFloor = currFloor;
+			currFloor = stops.Pop();
+			currTime = currTime + abs(lastFloor - currFloor) * 5;
+
+			std::string currDirectionStr = "down";
+			if (Direction(currDirection) == 0)
+			{
+				currDirectionStr = "up";
+			}
+
+			output << currTime << ' ' << currFloor << ' ' << currDirectionStr << std::endl;
+
+			currNode = commands->Head();
+			while(currNode != nullptr && currNode->Value()->getTime() <= currTime)
+			{
+				ListNode<Command>* nextNode = currNode->Next();
+
+				if (currNode->Value()->getDestination() == currFloor)
+				{
+					commands->Remove(currNode);
+				}
+
+				currNode = nextNode;
+			}
+		}
+	}
+
+	//Writing result
+	std::cout << output.str();
+
+	delete commands;
 
     return 0;
 }
 
-LinkedList<Command> ReadInput(char argc, char* argv[])
+LinkedList<Command>* ReadInput(char argc, char* argv[])
 {
 	//Default file name
 	string fileName = "input.txt";
@@ -50,7 +126,7 @@ LinkedList<Command> ReadInput(char argc, char* argv[])
 	int totalFloors;
 	int totalCommands;
 
-	LinkedList<Command> commands = LinkedList<Command>();
+	LinkedList<Command>* commands = new LinkedList<Command>();
 
 	while (getline(infile, line))
 	{
@@ -114,12 +190,9 @@ LinkedList<Command> ReadInput(char argc, char* argv[])
 		readTimeOfCall = stoi(line.substr(leftSeparatorIndex, rightSeperatorIndex));
 
 		//Adding commands
-		//Command* newCommand = 
-		Node<Command>* newNode = new Node<Command>(new Command(readDirection, readFloor, readTimeOfCall));
-		commands.AddLast(newNode);
+		Command* newCommand = new Command(readDirection, readFloor, readTimeOfCall);
+		commands->AddTail(newCommand);
 	}
 
 	return commands;
 }
-
-
