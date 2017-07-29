@@ -19,6 +19,8 @@ public:
 	TrieNode* RightSibling();
 	TrieNode* FirstChild();
 
+	void SetIsFinal();
+	void SetValue(int value);
 	void SetRightSibling(TrieNode* node);
 	void SetFirstChild(TrieNode* node);
 
@@ -61,6 +63,16 @@ inline TrieNode* TrieNode::RightSibling()
 inline TrieNode* TrieNode::FirstChild()
 {
 	return this->_firstChild;
+}
+
+inline void TrieNode::SetIsFinal()
+{
+	this->_isFinal = true;
+}
+
+inline void TrieNode::SetValue(int value)
+{
+	this->_value = value;
 }
 
 inline void TrieNode::SetRightSibling(TrieNode* node)
