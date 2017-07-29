@@ -147,6 +147,7 @@
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="Trie.h" />
     <ClInclude Include="TrieNode.h" />
   </ItemGroup>
   <ItemGroup>
