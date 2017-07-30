@@ -8,6 +8,7 @@ private:
 	int _value;
 	TrieNode* _rightSibling;
 	TrieNode* _firstChild;
+	TrieNode* _lastChild;
 
 public:
 	TrieNode(char ch, bool isFinal, int value);
@@ -19,10 +20,10 @@ public:
 	TrieNode* RightSibling();
 	TrieNode* FirstChild();
 
-	void SetIsFinal();
+	void SetIsFinal(bool isFinal);
 	void SetValue(int value);
 	void SetRightSibling(TrieNode* node);
-	void SetFirstChild(TrieNode* node);
+	void AddChild(TrieNode* node);
 
 };
 
@@ -34,6 +35,7 @@ inline TrieNode::TrieNode(char ch, bool isFinal = false, int value = 0)
 
 	this->_rightSibling = nullptr;
 	this->_firstChild = nullptr;
+	this->_lastChild= nullptr;
 }
 
 inline TrieNode::~TrieNode()
@@ -65,9 +67,10 @@ inline TrieNode* TrieNode::FirstChild()
 	return this->_firstChild;
 }
 
-inline void TrieNode::SetIsFinal()
+
+inline void TrieNode::SetIsFinal(bool isFinal)
 {
-	this->_isFinal = true;
+	this->_isFinal = isFinal;
 }
 
 inline void TrieNode::SetValue(int value)
@@ -80,7 +83,16 @@ inline void TrieNode::SetRightSibling(TrieNode* node)
 	this->_rightSibling = node;
 }
 
-inline void TrieNode::SetFirstChild(TrieNode* node)
+inline void TrieNode::AddChild(TrieNode* node)
 {
-	this->_firstChild = node;
+	if (this->_firstChild == nullptr)
+	{
+		this->_firstChild = node;
+		this->_lastChild = node;
+
+		return;
+	}
+
+	this->_lastChild->SetRightSibling(node);
+	this->_lastChild = node;
 }

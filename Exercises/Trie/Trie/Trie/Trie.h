@@ -7,6 +7,8 @@ class Trie
 private:
 	TrieNode* _start;
 
+	TrieNode* Search(TrieNode* node, char ch);
+
 public:
 	Trie();
 	~Trie();
@@ -14,6 +16,28 @@ public:
 	TrieNode* Start();
 	TrieNode* Add(TrieNode* node, char ch, bool isFinal, int value);
 };
+
+inline TrieNode* Trie::Search(TrieNode* node, char ch)
+{
+	TrieNode* child = node->FirstChild();
+
+	if (child == nullptr)
+	{
+		return node;
+	}
+
+	do
+	{
+		if (child->Character() == ch)
+		{
+			return child;
+		}
+
+		child = child->RightSibling();
+	} while (child != nullptr);
+
+	return node;
+}
 
 inline Trie::Trie()
 {
@@ -33,9 +57,25 @@ inline TrieNode* Trie::Start()
 
 inline TrieNode* Trie::Add(TrieNode* node, char ch, bool isFinal = false, int value = 0)
 {
-	TrieNode* newNode = new TrieNode(ch, isFinal, value);
+	TrieNode* nextNode = Search(node, ch);
 
-	node->SetFirstChild(newNode);
+	if (nextNode == node)
+	{
+		nextNode = new TrieNode(ch, isFinal, value);
+		node->AddChild(nextNode);
+	}
+	else
+	{
+		if (nextNode->IsFinal() != isFinal)
+		{
+			nextNode->SetIsFinal(isFinal);
+		}
 
-	return newNode;
+		if (nextNode->Value() != value)
+		{
+			nextNode->SetValue(value);
+		}
+	}
+
+	return nextNode;
 }
