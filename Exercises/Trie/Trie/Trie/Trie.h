@@ -1,11 +1,13 @@
 #pragma once
 
 #include "TrieNode.h"
+#include "Stack/Stack.h"
 
 class Trie
 {
 private:
 	TrieNode* _start;
+	Stack<TrieNode> _nodes;
 
 	TrieNode* Search(TrieNode* node, char ch);
 
@@ -41,6 +43,8 @@ inline TrieNode* Trie::Search(TrieNode* node, char ch)
 
 inline Trie::Trie()
 {
+	this->_nodes = Stack<TrieNode>();
+
 	TrieNode* node = new TrieNode(' ', false, 0);
 
 	this->_start = node;
@@ -63,6 +67,8 @@ inline TrieNode* Trie::Add(TrieNode* node, char ch, bool isFinal = false, int va
 	{
 		nextNode = new TrieNode(ch, isFinal, value);
 		node->AddChild(nextNode);
+
+		this->_nodes.Add(nextNode);
 	}
 	else
 	{
