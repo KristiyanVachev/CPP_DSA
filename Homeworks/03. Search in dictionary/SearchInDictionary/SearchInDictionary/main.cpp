@@ -25,177 +25,94 @@ int main(int argc, char** argv)
 
 	Trie* trie = BuildDictionary(dictFileName);
 
+	//TODO TEST
+	argc = 3;
+	argv[2] = "text1.txt";
+
 	//Read text
 	for (int j = 2; j < argc; ++j)
 	{
 		std::string textFile = argv[j];
 
-		//Search
-		std::string currWord;
-		std::string lastFoundWord;
-
 		int wordCount = 0;
-		double points = 0;
-		bool onNextLine = false;
 
 		std::ifstream textInfile(textFile);
 		std::string line;
 
-		//Build dictionary
-		while (getline(textInfile, line))
-		{
-			int leftSep = 0;
-			int rightSep = 0;
-			bool inTrie = false;
+		TrieNode* currentNode = trie->Start();
+		TrieNode* nextNode;
+		bool skipToNextLetter = false;
 
-			while (rightSep >= 0)
+		int rollback = 0;
+		bool shorterPhraseFound = false;
+
+		double points = 0;
+		double savedPoints = 0;
+
+		char ch;
+		std::fstream fin(textFile, std::fstream::in);
+		while (fin >> std::noskipws >> ch) {
+			if (skipToNextLetter && isalpha(ch))
 			{
-				//Left separator is the first letter found
-				bool endOfWordsReached = true;
+				continue;
+			}
 
-				for (int i = rightSep; i < line.length(); ++i)
+			if (!isalpha(ch))
+			{
+				skipToNextLetter = false;
+
+				if (currentNode->IsFinal() || !skipToNextLetter)
 				{
-					if ((line[i] > 64 && line[i] < 91) || (line[i] > 96 && line[i] < 123))
-					{
-						leftSep = i;
-						endOfWordsReached = false;
-						break;
-					}
-				}
+					//Stop skipping for next word if there's been a midword not found
+					shorterPhraseFound = true;
 
-				if (endOfWordsReached)
-				{
-					break;
-				}
-				endOfWordsReached = true;
-
-				//Right separator is the fist found non-letter
-				for (int i = leftSep; i < line.length(); ++i)
-				{
-					if (!((line[i] > 64 && line[i] < 91) || (line[i] > 96 && line[i] < 123)))
-					{
-						rightSep = i;
-						endOfWordsReached = false;
-						break;
-					}
-				}
-
-				if (endOfWordsReached)
-				{
-					rightSep = line.length();
-				}
-
-				if (leftSep == 0 && onNextLine)
-				{
-					currWord += " " + line.substr(leftSep, rightSep - leftSep);
-					onNextLine = false;
-
-					//TODO search for currwod
-					//trie.search(currWord, inTrie);
-					if (!inTrie)
-					{
-						currWord = line.substr(leftSep, rightSep - leftSep);
-					}
+					//Save points and place and look for longer phrase
+					savedPoints = currentNode->Value();
+					rollback = fin.tellg();
 				}
 				else
 				{
-					currWord = line.substr(leftSep, rightSep - leftSep);
+					continue;
 				}
+			}
 
-				wordCount++;
-				//TODO implementd ToLower
-				//currWord = ToLower(currWord);
+			if (isalpha(ch) || isspace(ch))
+			{
+				//if space, save last node's value and continue searching
 
-				//Check if contains
-				//TODO search again
-				//trie.search(currWord, inTrie);
+				nextNode = trie->Search(currentNode, ch);
 
-				bool foundWord = false;
-
-				if (inTrie)
+				//If phrase is not found
+				if (currentNode == nextNode)
 				{
-					foundWord = true;
-					lastFoundWord = currWord;
+					//if shorter word has been found add its points and rollback
+					if (shorterPhraseFound)
+					{
+						points += savedPoints;
+						fin.seekg(rollback);
+						shorterPhraseFound = false;
+					}
+					else
+					{
+						skipToNextLetter = true;
+					}
+
+					currentNode = trie->Start();
 				}
-
-				int inTrieLeftSep = leftSep;
-				int inTrieRightSep = rightSep;
-
-				//Add more words while being found
-				while (inTrie && inTrieRightSep != line.length())
+				else
 				{
-					//Flag for atleast one found word
-					foundWord = true;
-
-					//If the next word after a found word is not separated by a single space or a tab, break
-					if (line[inTrieRightSep] == ' ')
-					{
-						if (!((line[inTrieRightSep + 1] > 64 && line[inTrieRightSep + 1] < 91) || (line[inTrieRightSep + 1] > 96 && line[inTrieRightSep + 1] < 123)))
-						{
-							break;
-						}
-					}
-
-					lastFoundWord = currWord;
-
-					inTrieLeftSep = inTrieRightSep + 1;
-
-					inTrieRightSep = line.find(' ', inTrieLeftSep);
-
-					if (inTrieRightSep < 0)
-					{
-						for (int i = line.length(); i > inTrieLeftSep; --i)
-						{
-							inTrieRightSep = line.length();
-
-							if ((line[i] > 64 && line[i] < 91) || (line[i] > 96 && line[i] < 123))
-							{
-								inTrieRightSep = i + 1;
-
-								if (inTrieRightSep >= line.length())
-								{
-									inTrieRightSep = line.length();
-									//onNextLine = true;
-								}
-								break;
-							}
-						}
-					}
-
-					currWord += " " + line.substr(inTrieLeftSep, inTrieRightSep - inTrieLeftSep);
-					
-					//TODO
-//					currWord = ToLower(currWord);
-//					trie.search(currWord, inTrie);
-
-					//jump over a found phrase
-					if (inTrie)
-					{
-						leftSep = inTrieLeftSep;
-						rightSep = inTrieRightSep;
-						lastFoundWord = currWord;
-						if (currWord != " ")
-						{
-							wordCount++;
-						}
-					}
-				}
-
-				if (foundWord)
-				{
-					//TODO Check last char for value
-					//points += dict[lastFoundWord];
-					lastFoundWord = "";
-					//The phrase could continue on the next line only if is separated only by a new line.
-					if ((line[line.length() - 1] > 64 && line[line.length() - 1] < 91) || (line[line.length() - 1] > 96 && line[line.length() - 1] < 123))
-					{
-						onNextLine = true;
-					}
+					currentNode = nextNode;
 				}
 			}
 		}
-		std::cout << textFile << " " << points / wordCount << std::endl;
 
+		//Edge case
+		if (shorterPhraseFound)
+		{
+			points += savedPoints;
+		}
+
+		std::cout << points << std::endl;
 	}
 
 	delete trie;
