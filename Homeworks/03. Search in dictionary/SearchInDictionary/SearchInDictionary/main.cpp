@@ -52,6 +52,8 @@ int main(int argc, char** argv)
 		char ch;
 		std::fstream fin(textFile, std::fstream::in);
 		while (fin >> std::noskipws >> ch) {
+
+			//If a char is not matched, skip all the letters after until a non letter is found, and a new phrase could start being matched.
 			if (skipToNextLetter && isalpha(ch))
 			{
 				continue;
@@ -61,12 +63,11 @@ int main(int argc, char** argv)
 			{
 				skipToNextLetter = false;
 
+				//If a word is being matched save it's points and start place and search for a longer phrase
 				if (currentNode->IsFinal() || !skipToNextLetter)
 				{
-					//Stop skipping for next word if there's been a midword not found
 					shorterPhraseFound = true;
 
-					//Save points and place and look for longer phrase
 					savedPoints = currentNode->Value();
 					rollback = fin.tellg();
 				}
@@ -78,20 +79,19 @@ int main(int argc, char** argv)
 
 			if (isalpha(ch) || isspace(ch))
 			{
-				//if space, save last node's value and continue searching
-
 				nextNode = trie->Search(currentNode, ch);
 
-				//If phrase is not found
+				//If the next letter of the current phrase is not found
 				if (currentNode == nextNode)
 				{
-					//if shorter word has been found add its points and rollback
+					//If a shorter word has been found add its points and rollback to the last matched word
 					if (shorterPhraseFound)
 					{
 						points += savedPoints;
 						fin.seekg(rollback);
 						shorterPhraseFound = false;
 					}
+					//Phrase has not been found while in the current word, so skip all the rest of the letters in the word
 					else
 					{
 						skipToNextLetter = true;
@@ -99,6 +99,7 @@ int main(int argc, char** argv)
 
 					currentNode = trie->Start();
 				}
+				//Next letter is matched
 				else
 				{
 					currentNode = nextNode;
@@ -106,10 +107,17 @@ int main(int argc, char** argv)
 			}
 		}
 
-		//Edge case
-		if (shorterPhraseFound)
+		//Edge case when a phrase is matched, but it's at the end of the file
+		if (currentNode->IsFinal())
 		{
-			points += savedPoints;
+			points += currentNode->Value();
+		}
+		else
+		{
+			if (shorterPhraseFound)
+			{
+				points += savedPoints;
+			}
 		}
 
 		std::cout << points << std::endl;
