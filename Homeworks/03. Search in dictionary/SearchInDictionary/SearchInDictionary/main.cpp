@@ -34,10 +34,6 @@ int main(int argc, char** argv)
 	{
 		std::string textFile = argv[j];
 
-		int wordCount = 0;
-
-		std::ifstream textInfile(textFile);
-		std::string line;
 
 		TrieNode* currentNode = trie->Start();
 		TrieNode* nextNode;
@@ -48,6 +44,9 @@ int main(int argc, char** argv)
 
 		double points = 0;
 		double savedPoints = 0;
+
+		int wordCount = 0;
+		bool newWord = false;
 
 		char ch;
 		std::fstream fin(textFile, std::fstream::in);
@@ -61,6 +60,12 @@ int main(int argc, char** argv)
 
 			if (!isalpha(ch))
 			{
+				if (newWord)
+				{
+					newWord = false;
+					wordCount++;
+				}
+
 				skipToNextLetter = false;
 
 				//If a word is being matched save it's points and start place and search for a longer phrase
@@ -79,6 +84,11 @@ int main(int argc, char** argv)
 
 			if (isalpha(ch) || isspace(ch))
 			{
+				if (!newWord && isalpha(ch))
+				{
+					newWord = true;
+				}
+
 				nextNode = trie->Search(currentNode, ch);
 
 				//If the next letter of the current phrase is not found
@@ -120,7 +130,7 @@ int main(int argc, char** argv)
 			}
 		}
 
-		std::cout << points << std::endl;
+		std::cout << textFile << " " << points / wordCount << std::endl;
 	}
 
 	delete trie;
