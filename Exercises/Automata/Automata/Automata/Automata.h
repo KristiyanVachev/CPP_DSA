@@ -21,7 +21,7 @@ public:
 	void ConcatState(char value);
 	void ConcatAutomata(Automata* second);
 	void MakeIterative();
- 	// | Union with automata	
+	void UniteAutomatas(Automata* second);
 
 	//When the automata's states and finals will no longer be used in other automatas
 	void ClearAll();
@@ -32,7 +32,7 @@ inline Automata::Automata()
 	this->_start = new State(' ', true);
 
 	this->_finals = new LinkedList<State>();
-	this->_finals->AddTail(this->_start);	
+	this->_finals->AddTail(this->_start);
 
 	this->_states = new Stack<State>();
 	this->_states->Add(this->_start);
@@ -40,10 +40,8 @@ inline Automata::Automata()
 
 inline Automata::~Automata()
 {
-	//Deleting the stack, but not the states themselves
+	//Deleting the stack, but not the states themselves, because they'll be used in another automata
 	delete this->_states;
-
-	//delete finals
 }
 
 inline State* Automata::Start()
@@ -70,7 +68,7 @@ inline void Automata::ConcatState(char value)
 	}
 
 	this->_finals->AddTail(newState);
-	
+
 	this->_states->Add(newState);
 }
 
@@ -78,13 +76,20 @@ inline void Automata::ConcatAutomata(Automata* second)
 {
 	//Make each final of the first automata link to the start of the second and make them not final
 	Node<State>* final = this->_finals->Head();
+	State* firstState = second->Start()->Next();
 
 	while (final != nullptr)
 	{
-		//TODO set alternative if next exist
-		final->Value()->SetNext(second->Start()->Next());
-		final->Value()->SetIsFinal(false);
-		
+		//If there is a next state, add it as an alternative to it
+		if (final->Value()->Next() == nullptr)
+		{
+			final->Value()->SetNext(firstState);
+		}
+		else
+		{
+			final->Value()->Next()->SetAlternative(firstState);
+		}
+
 		Node<State>* nextFinal = final->Next();
 		final = nextFinal;
 	}
@@ -122,6 +127,24 @@ inline void Automata::MakeIterative()
 	//Make the start final, because the iterative could be passed trough 0 times
 	this->Start()->SetIsFinal(true);
 	this->_finals->AddTail(this->Start());
+}
+
+inline void Automata::UniteAutomatas(Automata* second)
+{
+	this->Start()->Next()->SetAlternative(second->Start()->Next());
+
+	while (second->Finals()->Head() != nullptr)
+	{
+		this->_finals->AddTail(second->Finals()->Head()->Value());
+
+		second->Finals()->Remove(second->Finals()->Head());
+	}
+
+	delete second->Finals();
+	delete second->Start();
+	delete second;
+
+	//Optimize by matching same states
 }
 
 inline void Automata::ClearAll()

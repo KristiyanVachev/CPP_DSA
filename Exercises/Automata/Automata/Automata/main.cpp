@@ -16,13 +16,13 @@ int main()
 	cout << automata->Start()->Next()->Next()->IsFinal() << endl;
 
 	//Testing alternatives
-	State* state1 = new State('a', false);
-	State* state2 = new State('w', false);
+	//State* state1 = new State('a', false);
+	//State* state2 = new State('w', false);
 
-	automata->Start()->Next()->SetAlternative(state1);
-	automata->Start()->Next()->SetAlternative(state2);
+	//automata->Start()->Next()->SetAlternative(state1);
+	//automata->Start()->Next()->SetAlternative(state2);
 
-	cout << automata->Start()->Next()->Alternative()->Alternative()->Value() << endl;
+	//cout << automata->Start()->Next()->Alternative()->Alternative()->Value() << endl;
 
 	//Testing delete
 	//automata->DeleteStates();
@@ -40,6 +40,13 @@ int main()
 	
 	//Testing iteration
 	automata->MakeIterative();
+
+	Automata* automata3 = new Automata;
+
+	automata3->ConcatState('y');
+	automata3->ConcatState('a');
+
+	automata->UniteAutomatas(automata3);
 
     return 0;
 }
