@@ -17,11 +17,14 @@ public:
 
 	State* Start();
 
+	//
 	void ConcatState(char value);
 	
 	// . ConcatAutomata
 	// * Make iterative
  	// | Union with automata	
+
+	void DeleteStates();
 };
 
 inline Automata::Automata()
@@ -37,6 +40,7 @@ inline Automata::Automata()
 
 inline Automata::~Automata()
 {
+	//Deleting the stack, but not the states themselves
 	delete this->_states;
 }
 
@@ -61,4 +65,10 @@ inline void Automata::ConcatState(char value)
 	this->_finals->AddTail(newState);
 	
 	this->_states->Add(newState);
+}
+
+inline void Automata::DeleteStates()
+{
+	//Delete the states of the automata, when they're not going to be used in another automata
+	this->_states->DeleteValues();
 }

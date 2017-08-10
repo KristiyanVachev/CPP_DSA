@@ -14,6 +14,7 @@ public:
 	bool IsEmpty();
 	void Add(type* value);
 	type* Pop();
+	void DeleteValues();
 
 };
 
@@ -63,4 +64,22 @@ type* Stack<type>::Pop()
 	delete node;
 
 	return value;
+}
+
+template <typename type>
+void Stack<type>::DeleteValues()
+{
+	StackNode<type>* currentNode = this->_top;
+
+	while (!(currentNode == nullptr))
+	{
+		StackNode<type>* lowerNode = currentNode->Lower();
+
+		delete currentNode->Value();
+		delete currentNode;
+
+		currentNode = lowerNode;
+	}
+	
+	this->_top = nullptr;
 }
