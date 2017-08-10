@@ -32,7 +32,7 @@ inline Automata::Automata()
 	this->_start = new State(' ', true);
 
 	this->_finals = new LinkedList<State>();
-	this->_finals->AddTail(this->_start);
+	this->_finals->AddTail(this->_start);	
 
 	this->_states = new Stack<State>();
 	this->_states->Add(this->_start);
@@ -68,7 +68,7 @@ inline void Automata::ConcatState(char value)
 	}
 
 	this->_finals->AddTail(newState);
-
+	
 	this->_states->Add(newState);
 }
 
@@ -89,6 +89,8 @@ inline void Automata::ConcatAutomata(Automata* second)
 		{
 			final->Value()->Next()->SetAlternative(firstState);
 		}
+
+		final->Value()->SetIsFinal(false);
 
 		Node<State>* nextFinal = final->Next();
 		final = nextFinal;
@@ -136,10 +138,10 @@ inline void Automata::UniteAutomatas(Automata* second)
 	while (second->Finals()->Head() != nullptr)
 	{
 		this->_finals->AddTail(second->Finals()->Head()->Value());
-
+		
 		second->Finals()->Remove(second->Finals()->Head());
 	}
-
+	
 	delete second->Finals();
 	delete second->Start();
 	delete second;
