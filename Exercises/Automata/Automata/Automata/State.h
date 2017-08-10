@@ -23,7 +23,6 @@ public:
 	void SetIsFinal(bool isFinal);
 	void SetNext(State* state);
 	void SetAlternative(State* state);
-
 };
 
 inline State::State(char value, bool isFinal)
@@ -71,12 +70,12 @@ inline void State::SetNext(State* state)
 
 inline void State::SetAlternative(State* state)
 {
-	State* lastAlternative = this->Alternative();
+	State* lastAlternative = this;
 
-	while (lastAlternative != nullptr)
+	while (lastAlternative->Alternative() != nullptr)
 	{
 		lastAlternative = lastAlternative->Alternative();
 	}
 
-	lastAlternative->SetAlternative(state);
+	lastAlternative->_alternative = state;
 }

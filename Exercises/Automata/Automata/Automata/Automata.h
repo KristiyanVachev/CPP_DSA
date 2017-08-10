@@ -16,6 +16,7 @@ public:
 	State* Start();
 
 	void ConcatState(char value);
+	
 	// . ConcatAutomata
 	// * Make iterative
  	// | Union with automata	
