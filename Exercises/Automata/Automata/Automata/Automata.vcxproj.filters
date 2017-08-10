@@ -16,6 +16,9 @@
     <Filter Include="Header Files\LinkedList">
       <UniqueIdentifier>{82cd0108-11df-47f9-9086-c5b1abdded6a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Stack">
+      <UniqueIdentifier>{75c17335-ca72-47f2-b0ad-33be18db1987}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -38,6 +41,12 @@
     </ClInclude>
     <ClInclude Include="LinkedList\Node.h">
       <Filter>Header Files\LinkedList</Filter>
+    </ClInclude>
+    <ClInclude Include="Stack\Stack.h">
+      <Filter>Header Files\Stack</Filter>
+    </ClInclude>
+    <ClInclude Include="Stack\StackNode.h">
+      <Filter>Header Files\Stack</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

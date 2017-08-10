@@ -24,7 +24,7 @@ int main()
 
 	cout << automata->Start()->Next()->Alternative()->Alternative()->Value() << endl;
 
-
+	delete automata;
 	
     return 0;
 }

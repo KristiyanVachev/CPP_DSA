@@ -2,12 +2,14 @@
 
 #include "State.h"
 #include "LinkedList/LinkedList.h"
+#include "Stack/Stack.h"
 
 class Automata
 {
 private:
 	State* _start;
 	LinkedList<State>* _finals;
+	Stack<State>* _states;
 
 public:
 	Automata();
@@ -28,11 +30,14 @@ inline Automata::Automata()
 
 	this->_finals = new LinkedList<State>();
 	this->_finals->AddTail(this->_start);	
+
+	this->_states = new Stack<State>();
+	this->_states->Add(this->_start);
 }
 
 inline Automata::~Automata()
 {
-	//delete all states, possibly put them all in a stack
+	delete this->_states;
 }
 
 inline State* Automata::Start()
@@ -54,4 +59,6 @@ inline void Automata::ConcatState(char value)
 	}
 
 	this->_finals->AddTail(newState);
+	
+	this->_states->Add(newState);
 }
