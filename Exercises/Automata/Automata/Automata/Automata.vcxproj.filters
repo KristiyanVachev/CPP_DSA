@@ -48,6 +48,9 @@
     <ClInclude Include="Stack\StackNode.h">
       <Filter>Header Files\Stack</Filter>
     </ClInclude>
+    <ClInclude Include="Specials.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

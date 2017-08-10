@@ -1,19 +1,22 @@
 #pragma once
+#include "Specials.h"
 
 class State
 {
 private:
-	//TODO enum for any space, digit and letter
+	Specials _special;
 	char _value;
 	State* _next;
 	State* _alternative;
 	bool _isFinal;
 
 public:
-	State(char value, bool isFinal);
+	State(char value, bool isFinal, Specials special);
 	~State();
 
 	//Getters
+	bool IsSpecial();
+	Specials Special();
 	char Value();
 	bool IsFinal();
 	State* Next();
@@ -25,8 +28,9 @@ public:
 	void SetAlternative(State* state);
 };
 
-inline State::State(char value, bool isFinal)
+inline State::State(char value, bool isFinal = false, Specials special = None)
 {
+	this->_special = special;
 	this->_value = value;
 	this->_isFinal = isFinal;
 
@@ -36,6 +40,16 @@ inline State::State(char value, bool isFinal)
 
 inline State::~State()
 {
+}
+
+inline bool State::IsSpecial()
+{
+	return this->_special != None;
+}
+
+inline Specials State::Special()
+{
+	return this->_special;
 }
 
 inline char State::Value()

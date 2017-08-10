@@ -143,6 +143,7 @@
   <ItemGroup>
     <ClInclude Include="LinkedList\LinkedList.h" />
     <ClInclude Include="LinkedList\Node.h" />
+    <ClInclude Include="Specials.h" />
     <ClInclude Include="Stack\Stack.h" />
     <ClInclude Include="Stack\StackNode.h" />
     <ClInclude Include="State.h" />

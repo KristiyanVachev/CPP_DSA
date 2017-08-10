@@ -97,6 +97,9 @@ int main()
 		cout << "Automata should recognize word yay" << endl;
 	}
 
+	//Testing specials
+	automata->ConcatState(' ', AnyDigit);
+
 	//Testing delete
 	automata->ClearAll();
 	delete automata;

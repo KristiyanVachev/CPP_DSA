@@ -18,7 +18,7 @@ public:
 	State* Start();
 	LinkedList<State>* Finals();
 
-	void ConcatState(char value);
+	void ConcatState(char value, Specials special);
 	void ConcatAutomata(Automata* second);
 	void MakeIterative();
 	void UniteAutomatas(Automata* second);
@@ -54,9 +54,9 @@ inline LinkedList<State>* Automata::Finals()
 	return this->_finals;
 }
 
-inline void Automata::ConcatState(char value)
+inline void Automata::ConcatState(char value, Specials special = None)
 {
-	State* newState = new State(value, true);
+	State* newState = new State(value, true, special);
 
 	while (this->_finals->Head() != nullptr)
 	{
