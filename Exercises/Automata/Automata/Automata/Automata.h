@@ -20,7 +20,7 @@ public:
 
 	void ConcatState(char value);
 	void ConcatAutomata(Automata* second);
-	// * Make iterative
+	void MakeIterative();
  	// | Union with automata	
 
 	//When the automata's states and finals will no longer be used in other automatas
@@ -81,6 +81,7 @@ inline void Automata::ConcatAutomata(Automata* second)
 
 	while (final != nullptr)
 	{
+		//TODO set alternative if next exist
 		final->Value()->SetNext(second->Start()->Next());
 		final->Value()->SetIsFinal(false);
 		
@@ -94,6 +95,33 @@ inline void Automata::ConcatAutomata(Automata* second)
 
 	delete second->Start();
 	delete second;
+}
+
+inline void Automata::MakeIterative()
+{
+	//Make each final link to the first state of the automata
+	Node<State>* final = this->_finals->Head();
+	State* firstState = this->Start()->Next();
+
+	while (final != nullptr)
+	{
+		//If there is a next state, add it as an alternative to it
+		if (final->Value()->Next() == nullptr)
+		{
+			final->Value()->SetNext(firstState);
+		}
+		else
+		{
+			final->Value()->Next()->SetAlternative(firstState);
+		}
+
+		Node<State>* nextFinal = final->Next();
+		final = nextFinal;
+	}
+
+	//Make the start final, because the iterative could be passed trough 0 times
+	this->Start()->SetIsFinal(true);
+	this->_finals->AddTail(this->Start());
 }
 
 inline void Automata::ClearAll()

@@ -38,6 +38,9 @@ int main()
 
 	cout << automata->Start()->Value() << endl;
 	
+	//Testing iteration
+	automata->MakeIterative();
+
     return 0;
 }
 
