@@ -24,11 +24,20 @@ int main()
 
 	cout << automata->Start()->Next()->Alternative()->Alternative()->Value() << endl;
 
-	automata->DeleteStates();
-	delete automata;
-	
-	cout << state1->Value() << endl;
+	//Testing delete
+	//automata->DeleteStates();
+	//delete automata;
 
+	//Testing concat automata
+	Automata* automata2 = new Automata;
+
+	automata2->ConcatState('a');
+	automata2->ConcatState('y');
+	
+	automata->ConcatAutomata(automata2);
+
+	cout << automata->Start()->Value() << endl;
+	
     return 0;
 }
 
