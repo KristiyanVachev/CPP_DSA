@@ -87,7 +87,7 @@ inline void Automata::ConcatAutomata(Automata* second)
 		}
 		else
 		{
-			final->Value()->Next()->SetAlternative(firstState);
+			final->Value()->SetAlternative(firstState);
 		}
 
 		final->Value()->SetIsFinal(false);
