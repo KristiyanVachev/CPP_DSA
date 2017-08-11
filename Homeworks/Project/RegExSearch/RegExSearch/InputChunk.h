@@ -8,18 +8,18 @@ class InputChunk
 private:
 	ChunkType _type;
 	Automata* _automata;
-	InputChunk* _bracketPair;
+	DLNode<InputChunk>* _bracketPair;
 
 public:
-	InputChunk(ChunkType type, Automata* automata, InputChunk* bracketPair);
+	InputChunk(ChunkType type, Automata* automata, DLNode<InputChunk>* bracketPair);
 	~InputChunk();
 
 	ChunkType Type();
 	Automata* AutomataChunk();
-	InputChunk* BracketPair();
+	DLNode<InputChunk>* BracketPair();
 };
 
-inline InputChunk::InputChunk(ChunkType type, Automata* automata = nullptr, InputChunk* bracketPair = nullptr)
+inline InputChunk::InputChunk(ChunkType type, Automata* automata = nullptr, DLNode<InputChunk>* bracketPair = nullptr)
 {
 	this->_type = type;
 	this->_automata = automata;
@@ -40,7 +40,7 @@ inline Automata* InputChunk::AutomataChunk()
 	return this->_automata;
 }
 
-inline InputChunk* InputChunk::BracketPair()
+inline DLNode<InputChunk>* InputChunk::BracketPair()
 {
 	return this->_bracketPair;
 }
