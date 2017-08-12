@@ -17,7 +17,8 @@ int main(char argc, char* argv[])
 {
 	//string input = "\\s(((a*).b).(\\\\|/))";
 	//string input = "a*.b*.(\\\\|/.c*)";
-	string input = "((ab|cd).(wx|yz))";
+	string input = "(((a*).b).(\\\\|/))";
+	string word = "ab\\/";
 
 	DoublyLinkedList<InputChunk>* inputChunks = new DoublyLinkedList<InputChunk>();
 
@@ -92,10 +93,11 @@ int main(char argc, char* argv[])
 				continue;
 				break;
 			default:
+				//TODO check if letter is in scope of valid symbols
 				if (!isalpha(letter))
 				{
-					std::cout << "ERROR: Invalid symbol." << std::endl;
-					return 1;
+					/*std::cout << "ERROR: Invalid symbol." << std::endl;
+					return 1;*/
 				}
 				type = AutomataChunk;
 				break;
@@ -204,6 +206,55 @@ int main(char argc, char* argv[])
 
 	Automata* automata = inputChunks->Head()->Value()->AutomataChunk();
 	delete inputChunks;
+
+	//Search word
+
+	bool isRecognized;
+	State* currentState = automata->Start();
+
+	for (char letter : word)
+	{
+		if (currentState->Next() == nullptr)
+		{
+			isRecognized = false;
+			break;
+		}
+
+		if (currentState->Next()->Value() == letter)
+		{
+			currentState = currentState->Next();
+
+			if (currentState->IsFinal())
+			{
+				isRecognized = true;
+			}
+
+			continue;
+		}
+
+		currentState = currentState->Next()->Alternative();
+
+		while (currentState != nullptr)
+		{
+			if (currentState->Value() == letter)
+			{
+				if (currentState->IsFinal())
+				{
+					isRecognized = true;
+				}
+
+				break;;
+			}
+
+			currentState = currentState->Alternative();
+		}
+
+		if (currentState == nullptr)
+		{
+			isRecognized = false;
+			break;;
+		}
+	}
 
 	return 0;
 }
