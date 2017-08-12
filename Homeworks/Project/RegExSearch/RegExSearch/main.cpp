@@ -17,7 +17,7 @@ int main(char argc, char* argv[])
 {
 	//string input = "\\s(((a*).b).(\\\\|/))";
 	//string input = "a*.b*.(\\\\|/.c*)";
-	string input = "((ab|cd).(wx|yz))";
+	string input = "((ab|cd).(\\k*).(wx|yz))";
 
 	DoublyLinkedList<InputChunk>* inputChunks = new DoublyLinkedList<InputChunk>();
 
@@ -57,15 +57,16 @@ int main(char argc, char* argv[])
 				type = AutomataChunk;
 				break;
 			default:
-				//invalid input
-				break;
+				//TODO destroy everything before returning
+				std::cout << "ERROR: Invalid symbol after \\" << std::endl;
+				return 1;
 			}
 		}
 		else
 		{
 			switch (letter)
 			{
-			case 40:
+			case '(':
 				type = OpeningBracket;
 				break;
 			case ')':
@@ -73,7 +74,8 @@ int main(char argc, char* argv[])
 				bracketPair = openBrackets.Pop();
 				if (bracketPair == nullptr)
 				{
-					//error, closing bracket without an open one
+					std::cout << "ERROR: Closing bracket without an opening one." << std::endl;
+					return 1;
 				}
 				break;
 			case '*':
@@ -92,7 +94,8 @@ int main(char argc, char* argv[])
 			default:
 				if (!isalpha(letter))
 				{
-					//invalid symbol
+					std::cout << "ERROR: Invalid symbol." << std::endl;
+					return 1;
 				}
 				type = AutomataChunk;
 				break;
@@ -146,7 +149,8 @@ int main(char argc, char* argv[])
 
 			if (currentNode->Next()->Value()->Type() == ClosingBracket || currentNode->Next()->Next()->Value()->Type() == ClosingBracket)
 			{
-				//destroy brackets
+				std::cout << "ERROR: Invalidly placed brackets." << std::endl;
+				return 1;
 			}
 
 			currentNode = currentNode->Next()->Next();
@@ -276,7 +280,7 @@ DLNode<InputChunk>* Unite(DoublyLinkedList<InputChunk>* inputChunks, DLNode<Inpu
 	Automata* rightAutomata = currentNode->Next()->Value()->AutomataChunk();
 	if (rightAutomata == nullptr)
 	{
-		//error, not an automata
+		//error, no automata
 	}
 
 	currentNode->Previous()->Value()->AutomataChunk()->UniteAutomatas(rightAutomata);
