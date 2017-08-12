@@ -9,13 +9,17 @@
 
 using namespace std;
 
+DLNode<InputChunk>* Iterate(DoublyLinkedList<InputChunk>* inputChunks, DLNode<InputChunk>* currentNode);
+DLNode<InputChunk>* Concat(DoublyLinkedList<InputChunk>* inputChunks, DLNode<InputChunk>* currentNode);
+DLNode<InputChunk>* Unite(DoublyLinkedList<InputChunk>* inputChunks, DLNode<InputChunk>* currentNode);
+
 int main(char argc, char* argv[])
 {
 	//string input = "\\s(((a*).b).(\\\\|/))";
-	string input = "(((a*).b).(\\\\|/))";
+	string input = "(a*.b*.(\\\\|/.c*))";
 
 
-	DoublyLinkedList<InputChunk> inputChunks;
+	DoublyLinkedList<InputChunk>* inputChunks = new DoublyLinkedList<InputChunk>();
 
 	bool isSpecial = false;
 	ChunkType type;
@@ -98,9 +102,9 @@ int main(char argc, char* argv[])
 
 		if (type == AutomataChunk)
 		{
-			if (inputChunks.Tail() != nullptr && inputChunks.Tail()->Value()->Type() == AutomataChunk)
+			if (inputChunks->Tail() != nullptr && inputChunks->Tail()->Value()->Type() == AutomataChunk)
 			{
-				inputChunks.Tail()->Value()->AutomataChunk()->ConcatState(letter, special);
+				inputChunks->Tail()->Value()->AutomataChunk()->ConcatState(letter, special);
 				continue;
 			}
 			else
@@ -118,11 +122,11 @@ int main(char argc, char* argv[])
 			closingBrackets.AddTail(chunk);
 		}
 
-		inputChunks.AddTail(chunk);
+		inputChunks->AddTail(chunk);
 
 		if (type == OpeningBracket)
 		{
-			openBrackets.Add(inputChunks.Tail());
+			openBrackets.Add(inputChunks->Tail());
 		}
 	}
 
@@ -143,123 +147,124 @@ int main(char argc, char* argv[])
 
 		do
 		{
-			// |
-			if (currentNode->Value()->Type() == Union)
+			switch (currentNode->Value()->Type())
 			{
-				//if next != automata, error
-				DLNode<InputChunk>* nextOperation = currentNode->Next()->Next();;
-				while (nextOperation->Value()->Type() == Concatanation || nextOperation->Value()->Type() == Iteration)
-				{
-					if (nextOperation->Previous()->Value()->Type() == ClosingBracket)
-					{
-						break;
-					}
-
-					//if nextOperation == Concat
-
-					if (nextOperation->Value()->Type() == Iteration)
-					{
-						nextOperation->Previous()->Value()->AutomataChunk()->MakeIterative();
-
-						DLNode<InputChunk>* processedNode = nextOperation;
-						nextOperation = processedNode->Next()->Next();
-
-						inputChunks.Remove(processedNode);
-					}
-				}
-
-				//Do the iteration
-				//Concat automatas
-				Automata* rightAutomata = currentNode->Next()->Value()->AutomataChunk();
-				if (rightAutomata == nullptr)
-				{
-					//error, not an automata
-				}
-				currentNode->Previous()->Value()->AutomataChunk()->UniteAutomatas(rightAutomata);
-
-				//remove right automata node
-				inputChunks.Remove(currentNode->Next());
-
-				//remove processed sign
-				DLNode<InputChunk>* processedNode = currentNode;
-				currentNode = processedNode->Next();
-
-				inputChunks.Remove(processedNode);
-			}
-
-			// .
-			if (currentNode->Value()->Type() == Concatanation)
-			{
-				DLNode<InputChunk>* nextOperation = currentNode->Next()->Next();;
-				while (nextOperation->Value()->Type() == Iteration)
-				{
-					if (nextOperation->Previous()->Value()->Type() == ClosingBracket)
-					{
-						break;
-					}
-
-					//Make iterative
-					nextOperation->Previous()->Value()->AutomataChunk()->MakeIterative();
-
-					//Remove iterative sign and assign next operation after it
-					DLNode<InputChunk>* processedNode = nextOperation;
-					nextOperation = processedNode->Next()->Next();
-
-					inputChunks.Remove(processedNode);
-				}
-				
-				//Concat automatas
-				Automata* rightAutomata = currentNode->Next()->Value()->AutomataChunk();
-				if (rightAutomata == nullptr)
-				{
-					//error, not an automata
-				}
-				currentNode->Previous()->Value()->AutomataChunk()->ConcatAutomata(rightAutomata);
-
-				//remove right automata node
-				inputChunks.Remove(currentNode->Next());
-
-				//remove processed sign
-				DLNode<InputChunk>* processedNode = currentNode;
-				currentNode = processedNode->Next();
-
-				inputChunks.Remove(processedNode);
-
-				continue;
-			}
-
-			// *
-			if (currentNode->Value()->Type() == Iteration)
-			{
-				//Make previous node iterative
-				currentNode->Previous()->Value()->AutomataChunk()->MakeIterative();
-
-				//Delete the iteration sign after completion
-				DLNode<InputChunk>* processedNode = currentNode;
-				currentNode = processedNode->Next();
-
-				inputChunks.Remove(processedNode);
-
-				continue;
-			}
-
-			if (currentNode->Value()->Type() == AutomataChunk)
-			{
+			case Union:
+				currentNode = Unite(inputChunks, currentNode);
+				break;
+			case Concatanation:
+				currentNode = Concat(inputChunks, currentNode);
+				break;
+			case Iteration:
+				currentNode = Iterate(inputChunks, currentNode);
+				break;
+			default:
 				currentNode = currentNode->Next();
+				break;
 			}
-
 
 		} while (currentNode->Value()->Type() != ClosingBracket);
 
 		closingBrackets.Remove(currentClosingBracket);
 		currentClosingBracket = closingBrackets.Head();
-		
+
 		//Remove brackets with onlyone automata inside. 
 		//TODO check if memory is deleted
-		inputChunks.Remove(currentNode->Value()->BracketPair());
-		inputChunks.Remove(currentNode);
+		inputChunks->Remove(currentNode->Value()->BracketPair());
+		inputChunks->Remove(currentNode);
 	}
 
 	return 0;
+}
+
+DLNode<InputChunk>* Iterate(DoublyLinkedList<InputChunk>* inputChunks, DLNode<InputChunk>* currentNode)
+{
+	//Make the automata iterative
+	currentNode->Previous()->Value()->AutomataChunk()->MakeIterative();
+
+	//Delete the iteration sign after completion
+	DLNode<InputChunk>* processedNode = currentNode;
+	currentNode = processedNode->Next();
+
+	inputChunks->Remove(processedNode);
+
+	return currentNode;
+}
+
+DLNode<InputChunk>* Concat(DoublyLinkedList<InputChunk>* inputChunks, DLNode<InputChunk>* currentNode)
+{
+	//Check if there are any iterations that must be done before the concatanation
+	DLNode<InputChunk>* nextOperation = currentNode->Next()->Next();;
+	while (nextOperation->Value()->Type() == Iteration)
+	{
+		if (nextOperation->Previous()->Value()->Type() == ClosingBracket)
+		{
+			break;
+		}
+
+		//Make iterative
+		nextOperation = Iterate(inputChunks, nextOperation);
+	}
+
+	Automata* rightAutomata = currentNode->Next()->Value()->AutomataChunk();
+	if (rightAutomata == nullptr)
+	{
+		//error, not an automata
+	}
+
+	currentNode->Previous()->Value()->AutomataChunk()->ConcatAutomata(rightAutomata);
+
+	//Remove right automata node
+	inputChunks->Remove(currentNode->Next());
+
+	//Remove processed sign
+	DLNode<InputChunk>* processedNode = currentNode;
+	currentNode = processedNode->Next();
+
+	inputChunks->Remove(processedNode);
+
+	return currentNode;
+}
+
+DLNode<InputChunk>* Unite(DoublyLinkedList<InputChunk>* inputChunks, DLNode<InputChunk>* currentNode)
+{
+	//Check if there are any higher priority operations
+	DLNode<InputChunk>* nextOperation = currentNode->Next()->Next();;
+	while (nextOperation->Value()->Type() == Concatanation || nextOperation->Value()->Type() == Iteration)
+	{
+		if (nextOperation->Previous()->Value()->Type() == ClosingBracket)
+		{
+			break;
+		}
+
+		if (nextOperation->Value()->Type() == Concatanation)
+		{
+			nextOperation = Concat(inputChunks, nextOperation);
+		}
+
+		if (nextOperation->Value()->Type() == Iteration)
+		{
+			nextOperation = Iterate(inputChunks, nextOperation);
+		}
+	}
+
+	Automata* rightAutomata = currentNode->Next()->Value()->AutomataChunk();
+	if (rightAutomata == nullptr)
+	{
+		//error, not an automata
+	}
+
+	currentNode->Previous()->Value()->AutomataChunk()->UniteAutomatas(rightAutomata);
+
+	//Remove right automata node
+	inputChunks->Remove(currentNode->Next());
+
+	//Remove processed sign
+	DLNode<InputChunk>* processedNode = currentNode;
+	currentNode = processedNode->Next();
+
+	inputChunks->Remove(processedNode);
+
+	return currentNode;
 }
 
