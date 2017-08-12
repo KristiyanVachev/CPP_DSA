@@ -89,16 +89,41 @@ inline void Automata::ConcatAutomata(Automata* second)
 		{
 			final->Value()->SetAlternative(firstState);
 		}
-
-		final->Value()->SetIsFinal(false);
+		
+		//Keep it final if the second's start is final
+		if (!second->Start()->IsFinal())
+		{
+			final->Value()->SetIsFinal(false);
+		}
 
 		Node<State>* nextFinal = final->Next();
 		final = nextFinal;
 	}
 
-	//Assign the second's finals to the first (merged) automata and release the unused memory of the second
-	delete this->_finals;
-	this->_finals = second->Finals();
+	//If second's start is a final, then the first's finals remain as final
+	if (second->Start()->IsFinal())
+	{
+		Node<State>* finalOfSecond = second->Finals()->Head();
+		
+		while (finalOfSecond != nullptr)
+		{
+			//The start of the second is removed
+			if (finalOfSecond->Value() != second->Start())
+			{
+				this->_finals->AddTail(finalOfSecond->Value());
+			}
+
+			finalOfSecond = finalOfSecond->Next();
+		}
+
+		delete second->Finals();
+	}
+	else
+	{
+		//Assign the second's finals to the first (merged) automata and release the unused memory of the second
+		delete this->_finals;
+		this->_finals = second->Finals();
+	}
 
 	delete second->Start();
 	delete second;
