@@ -25,15 +25,15 @@ int main(int argc, char** argv)
 
 	Trie* trie = BuildDictionary(dictFileName);
 
-	//TODO TEST
-	argc = 3;
-	argv[2] = "text1.txt";
+	//Test files
+	//argc = 4;
+	//argv[2] = "text1.txt";
+	//argv[3] = "text2.txt";
 
 	//Read text
 	for (int j = 2; j < argc; ++j)
 	{
 		std::string textFile = argv[j];
-
 
 		TrieNode* currentNode = trie->Start();
 		TrieNode* nextNode;
