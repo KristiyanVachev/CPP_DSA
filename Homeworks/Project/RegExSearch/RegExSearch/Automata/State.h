@@ -89,6 +89,12 @@ inline void State::SetAlternative(State* state)
 	while (lastAlternative->Alternative() != nullptr)
 	{
 		lastAlternative = lastAlternative->Alternative();
+
+		//Skip if the alternative is already added
+		if (lastAlternative == state)
+		{
+			return;
+		}
 	}
 
 	lastAlternative->_alternative = state;
