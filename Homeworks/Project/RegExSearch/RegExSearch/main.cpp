@@ -16,8 +16,8 @@ DLNode<InputChunk>* Unite(DoublyLinkedList<InputChunk>* inputChunks, DLNode<Inpu
 int main(char argc, char* argv[])
 {
 	//string input = "\\s(((a*).b).(\\\\|/))";
-	string input = "(a*.b*.(\\\\|/.c*))";
-
+	//string input = "a*.b*.(\\\\|/.c*)";
+	string input = "((ab|cd).(wx|yz))";
 
 	DoublyLinkedList<InputChunk>* inputChunks = new DoublyLinkedList<InputChunk>();
 
@@ -95,7 +95,6 @@ int main(char argc, char* argv[])
 					//invalid symbol
 				}
 				type = AutomataChunk;
-				//If previous is an automata, concat state to it, else create new
 				break;
 			}
 		}
@@ -133,17 +132,30 @@ int main(char argc, char* argv[])
 	//Reduce each closing bracket
 
 	Node<InputChunk>* currentClosingBracket = closingBrackets.Head();
+	bool noBrackets = false;
 
-	while (currentClosingBracket != nullptr)
+	while (currentClosingBracket != nullptr || noBrackets == true)
 	{
-		DLNode<InputChunk>* currentNode = currentClosingBracket->Value()->BracketPair();
-		//If node after opening bracket isn't automata, invalid regex
-		if (currentNode->Next()->Value()->Type() == ClosingBracket || currentNode->Next()->Next()->Value()->Type() == ClosingBracket)
-		{
-			//destroy brackets
-		}
+		DLNode<InputChunk>* currentNode;
 
-		currentNode = currentNode->Next()->Next();
+		if (!noBrackets)
+		{
+			currentNode = currentClosingBracket->Value()->BracketPair();
+
+			//If node after opening bracket isn't automata, invalid regex
+
+			if (currentNode->Next()->Value()->Type() == ClosingBracket || currentNode->Next()->Next()->Value()->Type() == ClosingBracket)
+			{
+				//destroy brackets
+			}
+
+			currentNode = currentNode->Next()->Next();
+
+		}
+		else
+		{
+			currentNode = inputChunks->Head()->Next();
+		}
 
 		do
 		{
@@ -163,15 +175,28 @@ int main(char argc, char* argv[])
 				break;
 			}
 
-		} while (currentNode->Value()->Type() != ClosingBracket);
+		} while (currentNode != nullptr && currentNode->Value()->Type() != ClosingBracket);
 
-		closingBrackets.Remove(currentClosingBracket);
-		currentClosingBracket = closingBrackets.Head();
 
-		//Remove brackets with onlyone automata inside. 
-		//TODO check if memory is deleted
-		inputChunks->Remove(currentNode->Value()->BracketPair());
-		inputChunks->Remove(currentNode);
+		if (!noBrackets)
+		{
+			closingBrackets.Remove(currentClosingBracket);
+			currentClosingBracket = closingBrackets.Head();
+
+			//Remove brackets with onlyone automata inside. 
+			//TODO check if memory is deleted
+			inputChunks->Remove(currentNode->Value()->BracketPair());
+			inputChunks->Remove(currentNode);
+		}
+
+		if (currentClosingBracket == nullptr && noBrackets == false && inputChunks->Head()->Next() != nullptr)
+		{
+			noBrackets = true;
+		}
+		else
+		{
+			noBrackets = false;
+		}
 	}
 
 	return 0;
@@ -195,7 +220,7 @@ DLNode<InputChunk>* Concat(DoublyLinkedList<InputChunk>* inputChunks, DLNode<Inp
 {
 	//Check if there are any iterations that must be done before the concatanation
 	DLNode<InputChunk>* nextOperation = currentNode->Next()->Next();;
-	while (nextOperation->Value()->Type() == Iteration)
+	while (nextOperation != nullptr && nextOperation->Value()->Type() == Iteration)
 	{
 		if (nextOperation->Previous()->Value()->Type() == ClosingBracket)
 		{
@@ -230,7 +255,7 @@ DLNode<InputChunk>* Unite(DoublyLinkedList<InputChunk>* inputChunks, DLNode<Inpu
 {
 	//Check if there are any higher priority operations
 	DLNode<InputChunk>* nextOperation = currentNode->Next()->Next();;
-	while (nextOperation->Value()->Type() == Concatanation || nextOperation->Value()->Type() == Iteration)
+	while (nextOperation != nullptr && (nextOperation->Value()->Type() == Concatanation || nextOperation->Value()->Type() == Iteration))
 	{
 		if (nextOperation->Previous()->Value()->Type() == ClosingBracket)
 		{
