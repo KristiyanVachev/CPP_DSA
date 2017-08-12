@@ -17,7 +17,7 @@ int main(char argc, char* argv[])
 {
 	//string input = "\\s(((a*).b).(\\\\|/))";
 	//string input = "a*.b*.(\\\\|/.c*)";
-	string input = "((ab|cd).(\\k*).(wx|yz))";
+	string input = "((ab|cd).(wx|yz))";
 
 	DoublyLinkedList<InputChunk>* inputChunks = new DoublyLinkedList<InputChunk>();
 
@@ -111,7 +111,6 @@ int main(char argc, char* argv[])
 			}
 			else
 			{
-				//TODO make sure its deleted
 				automata = new Automata;
 				automata->ConcatState(letter, special);
 			}
@@ -187,8 +186,6 @@ int main(char argc, char* argv[])
 			closingBrackets.Remove(currentClosingBracket);
 			currentClosingBracket = closingBrackets.Head();
 
-			//Remove brackets with onlyone automata inside. 
-			//TODO check if memory is deleted
 			inputChunks->Remove(currentNode->Value()->BracketPair());
 			inputChunks->Remove(currentNode);
 		}
@@ -202,6 +199,11 @@ int main(char argc, char* argv[])
 			noBrackets = false;
 		}
 	}
+
+	//TODO check if there's only one chunk which is automata
+
+	Automata* automata = inputChunks->Head()->Value()->AutomataChunk();
+	delete inputChunks;
 
 	return 0;
 }
