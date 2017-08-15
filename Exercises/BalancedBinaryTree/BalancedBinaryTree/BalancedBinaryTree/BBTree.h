@@ -13,6 +13,8 @@ private:
 public:
 	BBTree(DynamicArray* arr);
 	~BBTree();
+
+	bool Search(int key, std::string data);
 };
 
 inline BTNode* BBTree::Seed(DynamicArray* arr, int start, int end)
@@ -52,3 +54,26 @@ inline BBTree::~BBTree()
 {
 }
 
+inline bool BBTree::Search(int key, std::string data)
+{
+	BTNode* currNode = this->_root;
+
+	while (currNode != nullptr)
+	{
+		if (currNode->Key() == key && currNode->Data() == data)
+		{
+			return true;
+		}
+
+		if (currNode->Key() > key)
+		{
+			currNode = currNode->LeftChild();
+		}
+		else
+		{
+			currNode = currNode->RightChild();
+		}
+	}
+
+	return false;
+}

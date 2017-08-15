@@ -36,6 +36,8 @@ int main()
 
 	BBTree* tree = new BBTree(&arr);
 	
+	cout << "6 is found " << tree->Search(6, "Six") << endl;
+	cout << "78 is not found " << tree->Search(78, "Seventy-Eight") << endl;
 
     return 0;
 }

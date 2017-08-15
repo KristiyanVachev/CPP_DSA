@@ -15,6 +15,11 @@ public:
 	BTNode(int key, std::string data);
 	~BTNode();
 
+	int Key();
+	std::string Data();
+	BTNode* LeftChild();
+	BTNode* RightChild();
+
 	void SetLeftChild(BTNode* node);
 	void SetRightChild(BTNode* node);
 };
@@ -30,6 +35,26 @@ inline BTNode::BTNode(int key, std::string data)
 
 inline BTNode::~BTNode()
 {
+}
+
+inline int BTNode::Key()
+{
+	return this->_key;
+}
+
+inline std::string BTNode::Data()
+{
+	return this->_data;
+}
+
+inline BTNode* BTNode::LeftChild()
+{
+	return this->_leftChild;
+}
+
+inline BTNode* BTNode::RightChild()
+{
+	return this->_rightChild;
 }
 
 inline void BTNode::SetLeftChild(BTNode* node)
