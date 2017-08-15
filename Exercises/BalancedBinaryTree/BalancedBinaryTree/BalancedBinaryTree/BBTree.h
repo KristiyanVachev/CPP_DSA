@@ -16,7 +16,8 @@ public:
 
 	BTNode* Search(int key, std::string data);
 	void Add(int key, std::string data);
-	bool Remove(int key, std::string data);
+	bool Remove(int key, std::string data, bool noData);
+	int RemoveAll(int key);
 };
 
 inline BTNode* BBTree::Seed(DynamicArray* arr, int start, int end)
@@ -117,7 +118,7 @@ inline void BBTree::Add(int key, std::string data)
 	}
 }
 
-inline bool BBTree::Remove(int key, std::string data)
+inline bool BBTree::Remove(int key, std::string data, bool noData = false)
 {
 	BTNode* parent = nullptr;
 	BTNode* currNode = this->_root;
@@ -126,7 +127,7 @@ inline bool BBTree::Remove(int key, std::string data)
 	//Find nodeToRemove and it's parent
 	while (currNode != nullptr)
 	{
-		if (currNode->Key() == key && currNode->Data() == data)
+		if (currNode->Key() == key && currNode->Data() == data || noData && currNode->Key() == key)
 		{
 			nodeToRemove = currNode;
 			break;
@@ -222,4 +223,16 @@ inline bool BBTree::Remove(int key, std::string data)
 
 	delete nodeToRemove;
 	nodeToRemove = nullptr;
+}
+
+inline int BBTree::RemoveAll(int key)
+{
+	int removed = 0;
+
+	while (this->Remove(key, "", true))
+	{
+		removed++;
+	}
+
+	return removed;
 }

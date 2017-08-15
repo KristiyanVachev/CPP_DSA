@@ -38,6 +38,13 @@ int main()
 	cout << "7 is found " << (tree->Search(7, "Seven") && true) << endl;
 
 	tree->Remove(4, "Four");
+	
+	tree->Add(12, "dsd");
+	tree->Add(12, "ddsd");
+	tree->Add(12, "ddad");
+	tree->Add(12, "gdfs");
+
+	cout << tree->RemoveAl(12) << endl;
 
     return 0;
 }
