@@ -30,12 +30,14 @@ int main()
 
 	BBTree* tree = new BBTree(&arr);
 	
-	cout << "6 is found " << tree->Search(6, "Six") << endl;
-	cout << "7 is not found " << tree->Search(7, "Seven") << endl;
+	cout << "6 is found " << (tree->Search(6, "Six") && true) << endl;
+	cout << "7 is not found " << (tree->Search(7, "Seven") && true) << endl;
 
 	tree->Add(7, "Seven");
 
-	cout << "7 is found " << tree->Search(7, "Seven") << endl;
+	cout << "7 is found " << (tree->Search(7, "Seven") && true) << endl;
+
+	tree->Remove(4, "Four");
 
     return 0;
 }

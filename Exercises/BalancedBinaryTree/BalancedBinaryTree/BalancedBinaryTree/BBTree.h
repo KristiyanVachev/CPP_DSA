@@ -14,8 +14,9 @@ public:
 	BBTree(DynamicArray* arr);
 	~BBTree();
 
-	bool Search(int key, std::string data);
+	BTNode* Search(int key, std::string data);
 	void Add(int key, std::string data);
+	bool Remove(int key, std::string data);
 };
 
 inline BTNode* BBTree::Seed(DynamicArray* arr, int start, int end)
@@ -55,7 +56,7 @@ inline BBTree::~BBTree()
 {
 }
 
-inline bool BBTree::Search(int key, std::string data)
+inline BTNode* BBTree::Search(int key, std::string data)
 {
 	BTNode* currNode = this->_root;
 
@@ -63,7 +64,7 @@ inline bool BBTree::Search(int key, std::string data)
 	{
 		if (currNode->Key() == key && currNode->Data() == data)
 		{
-			return true;
+			return currNode;
 		}
 
 		if (currNode->Key() > key)
@@ -76,7 +77,7 @@ inline bool BBTree::Search(int key, std::string data)
 		}
 	}
 
-	return false;
+	return nullptr;
 }
 
 inline void BBTree::Add(int key, std::string data)
@@ -114,4 +115,111 @@ inline void BBTree::Add(int key, std::string data)
 	{
 		parent->SetRightChild(newNode);
 	}
+}
+
+inline bool BBTree::Remove(int key, std::string data)
+{
+	BTNode* parent = nullptr;
+	BTNode* currNode = this->_root;
+	BTNode* nodeToRemove = nullptr;
+
+	//Find nodeToRemove and it's parent
+	while (currNode != nullptr)
+	{
+		if (currNode->Key() == key && currNode->Data() == data)
+		{
+			nodeToRemove = currNode;
+			break;
+		}
+
+		parent = currNode;
+
+		if (currNode->Key() > key)
+		{
+			currNode = currNode->LeftChild();
+		}
+		else
+		{
+			currNode = currNode->RightChild();
+		}
+	}
+
+	//Return if not found
+	if (nodeToRemove == nullptr)
+	{
+		return false;
+	}
+
+	//If nodeToRemove has no children, just delete it
+	if (nodeToRemove->LeftChild() == nullptr && nodeToRemove->RightChild() == nullptr) {
+		if (parent->LeftChild() == nodeToRemove)
+		{
+			parent->SetLeftChild(nullptr);
+		}
+		else
+		{
+			parent->SetRightChild(nullptr);
+		}
+	}
+	//IF nodeToRemove has a left or right child set it in its place
+	else if (nodeToRemove->RightChild() == nullptr) {
+		if (parent->LeftChild() == nodeToRemove)
+		{
+			parent->SetLeftChild(nodeToRemove->LeftChild());
+		}
+		else
+		{
+			parent->SetRightChild(nodeToRemove->LeftChild());
+		}
+
+	}
+	else if (nodeToRemove->LeftChild() == nullptr) {
+		if (parent->LeftChild() == nodeToRemove)
+		{
+			parent->SetLeftChild(nodeToRemove->RightChild());
+		}
+		else
+		{
+			parent->SetRightChild(nodeToRemove->RightChild());
+		}
+	}
+	else
+	{
+		//Find the smallest element after nodeToRemove
+		BTNode* leftMostParent = currNode->RightChild();
+		BTNode* leftMost = nodeToRemove->RightChild()->LeftChild();
+
+		while (leftMost->LeftChild() != nullptr)
+		{
+			leftMostParent = leftMost;
+			leftMost = leftMost->LeftChild();
+		}
+
+		//Set leftmost's parent to have the leftmost's child
+		leftMostParent->SetLeftChild(leftMost->RightChild());
+
+		//Put in in the place of the node to be removed
+		leftMost->SetLeftChild(nodeToRemove->LeftChild());
+		leftMost->SetRightChild(nodeToRemove->RightChild());
+
+		//Place leftMost in it's new parent's care
+		if (parent == nullptr)
+		{
+			this->_root = leftMost;
+		}
+		else
+		{
+			if (nodeToRemove->Key() < parent->Key())
+			{
+				parent->SetLeftChild(leftMost);
+			}
+			else
+			{
+				parent->SetRightChild(leftMost);
+			}
+		}
+	}
+
+	delete nodeToRemove;
+	nodeToRemove = nullptr;
 }
