@@ -9,6 +9,7 @@ private:
 	BTNode* _root;
 
 	BTNode* Seed(DynamicArray* arr, int start, int end);
+	void Free(BTNode* currNode);
 
 public:
 	BBTree(DynamicArray* arr);
@@ -48,6 +49,24 @@ inline BTNode* BBTree::Seed(DynamicArray* arr, int start, int end)
 	return nullptr;
 }
 
+inline void BBTree::Free(BTNode* currNode)
+{
+	BTNode* leftChild = currNode->LeftChild();
+	BTNode* rightChild = currNode->RightChild();
+
+	delete currNode;
+
+	if (leftChild != nullptr)
+	{
+		Free(leftChild);
+	}
+
+	if (rightChild != nullptr)
+	{
+		Free(rightChild);
+	}
+}
+
 inline BBTree::BBTree(DynamicArray* arr)
 {
 	this->_root = Seed(arr, 0, arr->Lenght() - 1);
@@ -55,6 +74,7 @@ inline BBTree::BBTree(DynamicArray* arr)
 
 inline BBTree::~BBTree()
 {
+	Free(this->_root);
 }
 
 inline BTNode* BBTree::Search(int key, std::string data)

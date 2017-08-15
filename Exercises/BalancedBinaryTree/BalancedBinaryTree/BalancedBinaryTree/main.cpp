@@ -44,7 +44,9 @@ int main()
 	tree->Add(12, "ddad");
 	tree->Add(12, "gdfs");
 
-	cout << tree->RemoveAl(12) << endl;
+	cout << tree->RemoveAll(12) << endl;
+
+	delete tree;
 
     return 0;
 }
