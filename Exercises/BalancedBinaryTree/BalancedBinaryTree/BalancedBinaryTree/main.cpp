@@ -18,6 +18,12 @@ int main()
 	arr.Add(5, "Five");
 	arr.Add(1, "One");
 	arr.Add(4, "Four");
+	arr.Add(4, "Four");
+	arr.Add(4, "Four");
+	arr.Add(4, "Four");
+	arr.Add(4, "Four");
+	arr.Add(4, "Four");
+	arr.Add(4, "Four");
 
 	arr.Sort();
 
