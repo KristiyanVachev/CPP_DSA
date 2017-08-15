@@ -151,6 +151,7 @@
     <ClInclude Include="ChunkType.h" />
     <ClInclude Include="DoublyLinkedList\DLNode.h" />
     <ClInclude Include="DoublyLinkedList\DoublyLinkedList.h" />
+    <ClInclude Include="FileType.h" />
     <ClInclude Include="InputChunk.h" />
     <ClInclude Include="LinkedList\LinkedList.h" />
     <ClInclude Include="LinkedList\Node.h" />

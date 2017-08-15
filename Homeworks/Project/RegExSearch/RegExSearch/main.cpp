@@ -10,6 +10,7 @@
 #include "InputChunk.h"
 
 #include <filesystem>
+#include "FileType.h"
 
 using namespace std;
 
@@ -17,48 +18,35 @@ DLNode<InputChunk>* Iterate(DoublyLinkedList<InputChunk>* inputChunks, DLNode<In
 DLNode<InputChunk>* Concat(DoublyLinkedList<InputChunk>* inputChunks, DLNode<InputChunk>* currentNode);
 DLNode<InputChunk>* Unite(DoublyLinkedList<InputChunk>* inputChunks, DLNode<InputChunk>* currentNode);
 Automata* ConstructAutomata(std::string regEx);
+bool MatchLine(Automata* automata, std::string line);
+FileType CheckFileType(char* path);
 
 int main(char argc, char* argv[])
 {
-	//string input = "\\s(((a*).b).(\\\\|/))";
-	//string input = "a*.b*.(\\\\|/.c*)";
-	string input = "(((a*).b).\\v.(\\\\|/))";
-	string word = "ab\\";
+	char* path = "D:\\Programming\\CPP_DSA\\Homeworks\\Project\\TestsFiles";
+	if (argc > 1)
+	{
+		path = argv[1];
+	}
 
-	//TODO check if file or directory
-	//char* path = "D:\\Programming\\CPP_DSA\\Homeworks\\Project\\RegExSearch\\RegExSearch\\main.cpp";
-	//struct stat s;
-	//if (stat(path, &s) == 0)
-	//{
-	//	if (s.st_mode & S_IFDIR)
-	//	{
-	//		cout << "directory" << endl;
-	//	}
-	//	else if (s.st_mode & S_IFREG)
-	//	{
-	//		cout << "file" << endl;
-	//	}
-	//	else
-	//	{
-	//		cout << "else" << endl;
-	//	}
-	//}
-	//else
-	//{
-	//	cout << "error" << endl;
-	//}
+	string regEx = "(((a*).b).(\\\\|/))";
+	if (argc > 2)
+	{
+		regEx = argv[2];
+	}
 
-	//TODO multiple files
-	//std::string directory = "D:\\Programming\\CPP_DSA\\Homeworks\\Project\\RegExSearch\\RegExSearch";
-	//for (auto & p : experimental::filesystem::directory_iterator(directory))
-	//{
-	//	std::cout << p << std::endl;
-	//}
+	FileType fileType = CheckFileType(path);
 
+	if (fileType == Other || fileType == Error)
+	{
+		std::cout << "Invalid file";
+	}
+
+	//Construct automata
 	Automata * automata;
 	try
 	{
-		automata = ConstructAutomata(input);
+		automata = ConstructAutomata(regEx);
 	}
 	catch (const std::invalid_argument& e)
 	{
@@ -67,56 +55,50 @@ int main(char argc, char* argv[])
 		return 1;
 	}
 
-	//Search word
-
-	bool isRecognized;
-	State* currentState = automata->Start();
-
-	for (char letter : word)
+	if (fileType == File)
 	{
-		if (currentState->Next() == nullptr)
-		{
-			isRecognized = false;
-			break;
-		}
+		ifstream infile(path);
+		string line;
 
-		if (currentState->Next()->Value() == letter)
+		while (getline(infile, line))
 		{
-			currentState = currentState->Next();
+			bool isRecognized = MatchLine(automata, line);
 
-			if (currentState->IsFinal())
+			if (isRecognized)
 			{
-				isRecognized = true;
+				cout << path << ":" << 0 << ":" << line << endl;
 			}
-
-			continue;
-		}
-
-		currentState = currentState->Next()->Alternative();
-
-		while (currentState != nullptr)
-		{
-			if (currentState->Value() == letter)
-			{
-				if (currentState->IsFinal())
-				{
-					isRecognized = true;
-				}
-
-				break;;
-			}
-
-			currentState = currentState->Alternative();
-		}
-
-		if (currentState == nullptr)
-		{
-			isRecognized = false;
-			break;;
 		}
 	}
 
-	cout << word << " is recognied: " << isRecognized << endl;
+	if (fileType == Directory)
+	{
+		for (auto & fileName : experimental::filesystem::directory_iterator(path))
+		{
+			char* file = _strdup(fileName.path().string().c_str());
+			FileType type = CheckFileType(file);
+
+			if (type == File)
+			{
+				ifstream infile(file);
+				string line;
+
+				while (getline(infile, line))
+				{
+					bool isRecognized = MatchLine(automata, line);
+
+					if (isRecognized)
+					{
+						cout << file << ":" << 0 << ":" << line << endl;
+					}
+				}
+			}
+
+			free(file);
+
+			//TODO go deep in other directories?
+		}
+	}
 
 	return 0;
 }
@@ -399,4 +381,87 @@ Automata* ConstructAutomata(std::string regEx)
 	delete inputChunks;
 
 	return automata;
+}
+
+bool MatchLine(Automata* automata, std::string line)
+{
+	bool isRecognized;
+	State* currentState = automata->Start();
+
+	for (char letter : line)
+	{
+		//No more matches for the remaining of the line
+		if (currentState->Next() == nullptr)
+		{
+			isRecognized = false;
+			break;
+		}
+
+		//Character is recognized in the first next
+		if (currentState->Next()->Value() == letter)
+		{
+			currentState = currentState->Next();
+
+			if (currentState->IsFinal())
+			{
+				isRecognized = true;
+			}
+
+			continue;
+		}
+
+		//Look for alternative matches
+		//TODO save them in a stack and go trought them if primary is not matched
+		currentState = currentState->Next()->Alternative();
+
+		while (currentState != nullptr)
+		{
+			if (currentState->Value() == letter)
+			{
+				if (currentState->IsFinal())
+				{
+					isRecognized = true;
+				}
+
+				break;;
+			}
+
+			currentState = currentState->Alternative();
+		}
+
+		if (currentState == nullptr)
+		{
+			isRecognized = false;
+			break;;
+		}
+	}
+
+	return isRecognized;
+}
+
+FileType CheckFileType(char* path)
+{
+	FileType fileType;
+	struct stat s;
+	if (stat(path, &s) == 0)
+	{
+		if (s.st_mode & S_IFDIR)
+		{
+			fileType = Directory;
+		}
+		else if (s.st_mode & S_IFREG)
+		{
+			fileType = File;
+		}
+		else
+		{
+			fileType = Other;
+		}
+	}
+	else
+	{
+		fileType = Error;
+	}
+
+	return fileType;
 }
