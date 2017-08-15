@@ -15,6 +15,7 @@ public:
 	~BBTree();
 
 	bool Search(int key, std::string data);
+	void Add(int key, std::string data);
 };
 
 inline BTNode* BBTree::Seed(DynamicArray* arr, int start, int end)
@@ -76,4 +77,41 @@ inline bool BBTree::Search(int key, std::string data)
 	}
 
 	return false;
+}
+
+inline void BBTree::Add(int key, std::string data)
+{
+	BTNode* parent = this->_root;
+	BTNode* currNode = this->_root;
+
+	while (currNode != nullptr)
+	{
+		parent = currNode;
+
+		if (key < currNode->Key())
+		{
+			currNode = currNode->LeftChild();
+		}
+		else
+		{
+			currNode = currNode->RightChild();
+		}
+	}
+
+	BTNode* newNode = new BTNode(key, data);
+
+	if (parent == nullptr)
+	{
+		this->_root = newNode;
+		return;
+	}
+
+	if (key < parent->Key())
+	{
+		parent->SetLeftChild(newNode);
+	}
+	else
+	{
+		parent->SetRightChild(newNode);
+	}
 }

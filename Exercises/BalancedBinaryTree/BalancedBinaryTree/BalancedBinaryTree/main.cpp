@@ -18,12 +18,6 @@ int main()
 	arr.Add(5, "Five");
 	arr.Add(1, "One");
 	arr.Add(4, "Four");
-	arr.Add(4, "Four");
-	arr.Add(4, "Four");
-	arr.Add(4, "Four");
-	arr.Add(4, "Four");
-	arr.Add(4, "Four");
-	arr.Add(4, "Four");
 
 	arr.Sort();
 
@@ -37,7 +31,11 @@ int main()
 	BBTree* tree = new BBTree(&arr);
 	
 	cout << "6 is found " << tree->Search(6, "Six") << endl;
-	cout << "78 is not found " << tree->Search(78, "Seventy-Eight") << endl;
+	cout << "7 is not found " << tree->Search(7, "Seven") << endl;
+
+	tree->Add(7, "Seven");
+
+	cout << "7 is found " << tree->Search(7, "Seven") << endl;
 
     return 0;
 }
