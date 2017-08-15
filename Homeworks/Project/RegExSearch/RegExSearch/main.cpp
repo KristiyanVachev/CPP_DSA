@@ -29,7 +29,7 @@ int main(char argc, char* argv[])
 		path = argv[1];
 	}
 
-	string regEx = "(((a*).b).(\\\\|/))";
+	string regEx = "(((A*).B).(\\\\|/))";
 	if (argc > 2)
 	{
 		regEx = argv[2];
@@ -268,11 +268,16 @@ Automata* ConstructAutomata(std::string regEx)
 				break;
 			default:
 				//TODO check if letter is in scope of valid symbols
-				if (!isalpha(letter))
+				if (letter < 33 || letter > 126)
 				{
-					/*std::cout << "ERROR: Invalid symbol." << std::endl;
-					return 1;*/
+					throw std::invalid_argument("Unsupported symbol.");
 				}
+
+				if (isalpha(letter))
+				{
+					letter = tolower(letter);
+				}
+
 				type = AutomataChunk;
 				break;
 			}
@@ -390,6 +395,12 @@ bool MatchLine(Automata* automata, std::string line)
 
 	for (char letter : line)
 	{
+		//Case insensitive
+		if (isalpha(letter))
+		{
+			letter = tolower(letter);
+		}
+
 		//No more matches for the remaining of the line
 		if (currentState->Next() == nullptr)
 		{
@@ -397,8 +408,15 @@ bool MatchLine(Automata* automata, std::string line)
 			break;
 		}
 
+		//TODO test
+		Specials stateSpecial = currentState->Next()->Special();
+		char stateValue = currentState->Next()->Value();
+
 		//Character is recognized in the first next
-		if (currentState->Next()->Value() == letter)
+		if (stateSpecial == None && stateValue == letter ||
+			stateSpecial == AnyLetter && isalpha(stateValue) ||
+			stateSpecial == AnyDigit && isdigit(stateValue) ||
+			stateSpecial == Whitespace && isspace(stateValue))
 		{
 			currentState = currentState->Next();
 
