@@ -12,6 +12,7 @@ public:
 	~Input();
 
 	int Key();
+	std::string Value();
 };
 
 inline Input::Input(int key, std::string value)
@@ -27,4 +28,9 @@ inline Input::~Input()
 inline int Input::Key()
 {
 	return this->_key;
+}
+
+inline std::string Input::Value()
+{
+	return this->_value;
 }

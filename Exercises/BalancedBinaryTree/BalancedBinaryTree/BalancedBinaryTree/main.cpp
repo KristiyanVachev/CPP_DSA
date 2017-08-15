@@ -18,16 +18,18 @@ int main()
 	arr.Add(5, "Five");
 	arr.Add(1, "One");
 	arr.Add(4, "Four");
-	arr.Add(7, "Seven");
 
 	arr.Sort();
 
-	for (int i = 0; i < 7; i++)
+	for (int i = 0; i < arr.Lenght(); i++)
 	{
 		cout << arr.Data()[i]->Key() << " ";
 	}
 
 	cout << endl;
+
+	BBTree* tree = new BBTree(&arr);
+	
 
     return 0;
 }
