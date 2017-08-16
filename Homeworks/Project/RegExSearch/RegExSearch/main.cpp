@@ -33,6 +33,8 @@ DLNode<InputChunk>* Unite(DoublyLinkedList<InputChunk>* inputChunks, DLNode<Inpu
 Automata* ConstructAutomata(std::string regEx);
 bool MatchLine(Automata* automata, std::string line);
 FileType CheckFileType(char* path);
+void MatchFile(Automata* automata, char* path, bool emptyRegEx);
+void MatchDirectory(Automata* automata, char* path, bool emptyRegEx);
 
 int main(char argc, char* argv[])
 {
@@ -78,64 +80,13 @@ int main(char argc, char* argv[])
 	//If path is a file try to match every line
 	if (fileType == File)
 	{
-		ifstream infile(path);
-		string line;
-		int lineCount = 1;
-
-		while (getline(infile, line))
-		{
-			bool isRecognized = false;
-
-			if (!emptyRegEx)
-			{
-				isRecognized = MatchLine(automata, line);
-			}
-
-			if (emptyRegEx || isRecognized)
-			{
-				cout << path << ":" << lineCount << ":" << line << endl;
-			}
-
-			lineCount++;
-		}
+		MatchFile(automata, path, emptyRegEx);
 	}
 
 	//If the path is a directory, try to match each file within it
 	if (fileType == Directory)
 	{
-		for (auto & fileName : experimental::filesystem::directory_iterator(path))
-		{
-			char* file = _strdup(fileName.path().string().c_str());
-			FileType type = CheckFileType(file);
-
-			if (type == File)
-			{
-				ifstream infile(file);
-				string line;
-				int lineCount = 1;
-
-				while (getline(infile, line))
-				{
-					bool isRecognized = false;
-
-					if (!emptyRegEx)
-					{
-						isRecognized = MatchLine(automata, line);
-					}
-
-					if (emptyRegEx || isRecognized)
-					{
-						cout << file << ":" << lineCount << ":" << line << endl;
-					}
-
-					lineCount++;
-				}
-			}
-
-			free(file);
-
-			//TODO go deep in other directories?
-		}
+		MatchDirectory(automata, path, emptyRegEx);
 	}
 
 	return 0;
@@ -566,4 +517,49 @@ FileType CheckFileType(char* path)
 	}
 
 	return fileType;
+}
+
+void MatchFile(Automata* automata, char* path, bool emptyRegEx)
+{
+	ifstream infile(path);
+	string line;
+	int lineCount = 1;
+
+	while (getline(infile, line))
+	{
+		bool isRecognized = false;
+
+		if (!emptyRegEx)
+		{
+			isRecognized = MatchLine(automata, line);
+		}
+
+		if (emptyRegEx || isRecognized)
+		{
+			cout << path << ":" << lineCount << ":" << line << endl;
+		}
+
+		lineCount++;
+	}
+}
+
+void MatchDirectory(Automata* automata, char* path, bool emptyRegEx)
+{
+	for (auto & fileName : experimental::filesystem::directory_iterator(path))
+	{
+		char* newPath = _strdup(fileName.path().string().c_str());
+		FileType type = CheckFileType(newPath);
+
+		if (type == File)
+		{
+			MatchFile(automata, newPath, emptyRegEx);
+		}
+
+		if (type == Directory)
+		{
+			MatchDirectory(automata, newPath, emptyRegEx);
+		}
+
+		free(newPath);
+	}
 }
