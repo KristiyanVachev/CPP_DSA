@@ -9,7 +9,6 @@ private:
 	BNode* _root;
 	
 	Stack<BNode>* _nodes;
-	void Free(BNode* currNode);
 
 public:
 	BinaryTree();
@@ -20,24 +19,6 @@ public:
 	BNode* Search(long key);
 	void Add(long key);
 };
-
-inline void BinaryTree::Free(BNode* currNode)
-{
-	BNode* leftChild = currNode->LeftChild();
-	BNode* rightChild = currNode->RightChild();
-
-	delete currNode;
-
-	if (leftChild != nullptr)
-	{
-		Free(leftChild);
-	}
-
-	if (rightChild != nullptr)
-	{
-		Free(rightChild);
-	}
-}
 
 inline BinaryTree::BinaryTree()
 {

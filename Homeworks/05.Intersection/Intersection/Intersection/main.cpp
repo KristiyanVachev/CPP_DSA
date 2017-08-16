@@ -1,33 +1,56 @@
+/**
+*
+* Solution to homework task
+* Data Structures Course
+* Faculty of Mathematics and Informatics of Sofia University
+* Winter semester 2016/2017
+*
+* @author Kristiyan Vachev
+* @idnumber 61905
+* @task 5
+* @compiler VS
+*
+*/
+
 #include "stdafx.h"
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <filesystem>
 
 #include "Tree/BinaryTree.h";
 
+bool IsFile(std::string fileName);
+
 int main()
 {
-	int n;
+	int n = 2;
 	std::cin >> n;
 
 	BinaryTree* tree = new BinaryTree();
-	//tree->Add(2);
-	//tree->Add(5);
-	//tree->Add(3);
-	//tree->Add(4);
-	//tree->Add(1);
-	//tree->Add(6);
 
 	//Read first set of numbers and add them inside the tree
-	std::string input;
+	std::string input = "123456.bin";
 	std::cin >> input;
+	
+	if (!IsFile(input))
+	{
+		std::cout << "Invalid file path" << std::endl;
+		delete tree;
+		return 1;
+	}
+
 	std::ifstream reader(input);
 	while (!reader.eof())
 	{
 		long newNumber = 0;
 		reader.read((char*)&newNumber, sizeof(newNumber));
 
-		tree->Add(newNumber);
+		//EOF reads until it meets a bad character, thus every time reading one more character than necessary
+		if (!reader.eof())
+		{
+			tree->Add(newNumber);
+		}
 	}
 
 	reader.close();
@@ -38,20 +61,35 @@ int main()
 	//Read each next file and save every number that is within the original tree
 	while (n > 0)
 	{
-		std::ifstream reader(input);
+		input = "4.bin";
+		std::cin >> input;
 
-		while (!reader.eof())
+		if (!IsFile(input))
 		{
-			long nextNumber = 0;
-			reader.read((char*)&nextNumber, sizeof(nextNumber));
+			std::cout << "Invalid file path" << std::endl;
+			delete tree;
+			delete intersectedTree;
+			return 1;
+		}
 
-			if (tree->Search(nextNumber) != nullptr)
+		std::ifstream intersectionReader(input);
+
+		while (!intersectionReader.eof())
+		{
+			long nextNumber;
+			intersectionReader.read((char*)&nextNumber, sizeof(nextNumber));
+
+			//EOF reads until it meets a bad character, thus every time reading one more character than necessary
+			if (!intersectionReader.eof())
 			{
-				intersectedTree->Add(nextNumber);
+				if (tree->Search(nextNumber) != nullptr)
+				{
+					intersectedTree->Add(nextNumber);
+				}
 			}
 		}
 
-		reader.close();
+		intersectionReader.close();
 
 		delete tree;
 		tree = intersectedTree;
@@ -59,10 +97,6 @@ int main()
 
 		--n;
 	}
-
-	//intersectedTree->Add(4);
-	//delete tree;
-	//tree = intersectedTree;
 
 	//Write each number into the file
 	std::ofstream writer("result.bin", std::ios::binary);
@@ -80,3 +114,28 @@ int main()
 	return 0;
 }
 
+bool IsFile(std::string fileName)
+{
+	char* path = _strdup(fileName.c_str());
+
+	struct stat s;
+	if (stat(path, &s) == 0)
+	{
+		if (s.st_mode & S_IFDIR)
+		{
+			return false;
+		}
+		else if (s.st_mode & S_IFREG)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	else
+	{
+		return false;
+	}
+}
