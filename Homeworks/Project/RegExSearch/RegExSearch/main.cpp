@@ -1,17 +1,28 @@
+/**
+*
+* Solution to homework task
+* Data Structures Course
+* Faculty of Mathematics and Informatics of Sofia University
+* Winter semester 2016/2017
+*
+* @author Kristiyan Vachev
+* @idnumber 61905
+* @task Course Project
+* @compiler VS
+*
+*/
+
 #include "stdafx.h"
 
 #include <string>
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
-
+#include <filesystem>
 
 #include "DoublyLinkedList/DoublyLinkedList.h"
 #include "InputChunk.h"
-
 #include "AlternativeRoute.h"
-
-#include <filesystem>
 #include "FileType.h"
 
 using namespace std;
@@ -25,7 +36,7 @@ FileType CheckFileType(char* path);
 
 int main(char argc, char* argv[])
 {
-	char* path = "D:\\Programming\\CPP_DSA\\Homeworks\\Project\\TestsFiles";
+	char* path = "TestsFiles";
 	if (argc > 1)
 	{
 		path = argv[1];
@@ -41,10 +52,10 @@ int main(char argc, char* argv[])
 
 	if (fileType == Other || fileType == Error)
 	{
-		std::cout << "Invalid file";
+		std::cout << "Invalid file path";
 	}
 
-	//Construct automata
+	//Construct automata, validating the regEx is valid
 	Automata * automata;
 	try
 	{
@@ -52,27 +63,32 @@ int main(char argc, char* argv[])
 	}
 	catch (const std::invalid_argument& e)
 	{
-		std::cout << e.what() << endl;
+		std::cout << "RegEx error: " <<  e.what() << endl;
 		//TODO free other memory
 		return 1;
 	}
 
+	//If path is a file try to match every line
 	if (fileType == File)
 	{
 		ifstream infile(path);
 		string line;
-
+		int lineCount = 1;
+		
 		while (getline(infile, line))
 		{
 			bool isRecognized = MatchLine(automata, line);
 
 			if (isRecognized)
 			{
-				cout << path << ":" << 0 << ":" << line << endl;
+				cout << path << ":" << lineCount << ":" << line << endl;
 			}
+
+			lineCount++;
 		}
 	}
 
+	//If the path is a directory, try to match each file within it
 	if (fileType == Directory)
 	{
 		for (auto & fileName : experimental::filesystem::directory_iterator(path))
@@ -84,6 +100,7 @@ int main(char argc, char* argv[])
 			{
 				ifstream infile(file);
 				string line;
+				int lineCount = 1;
 
 				while (getline(infile, line))
 				{
@@ -91,8 +108,10 @@ int main(char argc, char* argv[])
 
 					if (isRecognized)
 					{
-						cout << file << ":" << 0 << ":" << line << endl;
+						cout << file << ":" << lineCount << ":" << line << endl;
 					}
+
+					lineCount++;
 				}
 			}
 
@@ -198,11 +217,14 @@ DLNode<InputChunk>* Unite(DoublyLinkedList<InputChunk>* inputChunks, DLNode<Inpu
 
 Automata* ConstructAutomata(std::string regEx)
 {
+	//Parsing the regex to chunks of either a bracket, automata of one or more simple characters or an operation sign
 	DoublyLinkedList<InputChunk>* inputChunks = new DoublyLinkedList<InputChunk>();
 
 	bool isSpecial = false;
 	ChunkType type;
 
+	//Keeping info about opening and closing brackets to match each closing bracket with it's openning 
+	//And to do the operations within every closing bracket with their priority
 	Stack<DLNode<InputChunk>> openBrackets;
 	LinkedList<InputChunk> closingBrackets;
 
@@ -212,6 +234,7 @@ Automata* ConstructAutomata(std::string regEx)
 		Automata* automata = nullptr;
 		DLNode<InputChunk>* bracketPair = nullptr;
 
+		//If the previous character is '\'
 		if (isSpecial)
 		{
 			isSpecial = false;
@@ -236,7 +259,7 @@ Automata* ConstructAutomata(std::string regEx)
 				type = AutomataChunk;
 				break;
 			default:
-				//TODO destroy everything before returning
+				delete inputChunks;
 				throw std::invalid_argument("Invalid symbol after \\");
 			}
 		}
@@ -252,6 +275,7 @@ Automata* ConstructAutomata(std::string regEx)
 				bracketPair = openBrackets.Pop();
 				if (bracketPair == nullptr)
 				{
+					delete inputChunks;
 					throw std::invalid_argument("Closing bracket without an opening one.");
 				}
 				break;
@@ -269,9 +293,9 @@ Automata* ConstructAutomata(std::string regEx)
 				continue;
 				break;
 			default:
-				//TODO check if letter is in scope of valid symbols
 				if (letter < 33 || letter > 126)
 				{
+					delete inputChunks;
 					throw std::invalid_argument("Unsupported symbol.");
 				}
 
@@ -285,13 +309,16 @@ Automata* ConstructAutomata(std::string regEx)
 			}
 		}
 
+		//If the red character is a state (just a letter)
 		if (type == AutomataChunk)
 		{
+			//Concat it to the previous automata if there is one
 			if (inputChunks->Tail() != nullptr && inputChunks->Tail()->Value()->Type() == AutomataChunk)
 			{
 				inputChunks->Tail()->Value()->AutomataChunk()->ConcatState(letter, special);
 				continue;
 			}
+			//Else, create a new automata containing the single letter
 			else
 			{
 				automata = new Automata;
@@ -301,6 +328,7 @@ Automata* ConstructAutomata(std::string regEx)
 
 		InputChunk* chunk = new InputChunk(type, automata, bracketPair);
 
+		//If the read character was a closing bracket add it to the collection
 		if (type == ClosingBracket)
 		{
 			closingBrackets.AddTail(chunk);
@@ -314,8 +342,9 @@ Automata* ConstructAutomata(std::string regEx)
 		}
 	}
 
-	//Reduce each closing bracket
-
+	//Now we have simple automatas between brackets and signs
+	//Starting by the elements in within the brackets of the last closing brackets added (being last ensures that
+	//there is no other brackets inside it). we do the sign operations by their priority and move to the next brackets.
 	Node<InputChunk>* currentClosingBracket = closingBrackets.Head();
 	bool noBrackets = false;
 
@@ -328,9 +357,9 @@ Automata* ConstructAutomata(std::string regEx)
 			currentNode = currentClosingBracket->Value()->BracketPair();
 
 			//If node after opening bracket isn't automata, invalid regex
-
 			if (currentNode->Next()->Value()->Type() == ClosingBracket || currentNode->Next()->Next()->Value()->Type() == ClosingBracket)
-			{
+			{ 
+				delete inputChunks;
 				throw std::invalid_argument("Invalidly placed brackets.");
 			}
 
@@ -344,6 +373,7 @@ Automata* ConstructAutomata(std::string regEx)
 
 		do
 		{
+			//Do each operation, with priority
 			switch (currentNode->Value()->Type())
 			{
 			case Union:
@@ -362,7 +392,7 @@ Automata* ConstructAutomata(std::string regEx)
 
 		} while (currentNode != nullptr && currentNode->Value()->Type() != ClosingBracket);
 
-
+		//If all the operations within the brackets are done, and there is the single automata within, remove the brackets
 		if (!noBrackets)
 		{
 			closingBrackets.Remove(currentClosingBracket);
@@ -392,7 +422,8 @@ Automata* ConstructAutomata(std::string regEx)
 
 bool MatchLine(Automata* automata, std::string line)
 {
-	Stack<AlternativeRoute> alternativeRoutes = Stack<AlternativeRoute>();
+	//Keeping every match in a stack, so that we don't miss any possible route
+	Stack<AlternativeRoute> matchedStates = Stack<AlternativeRoute>();
 
 	bool isRecognized = false;
 	State* currentState = automata->Start();
@@ -401,16 +432,16 @@ bool MatchLine(Automata* automata, std::string line)
 	do
 	{
 		//Get the new route from the stack every time except the first
-		if (!alternativeRoutes.IsEmpty())
+		if (!matchedStates.IsEmpty())
 		{
-			AlternativeRoute* lastNode = alternativeRoutes.Pop();
-			i = lastNode->Index() + 1;
-			currentState = lastNode->State();
+			AlternativeRoute* matchedState = matchedStates.Pop();
+			i = matchedState->Index() + 1;
+			currentState = matchedState->State();
+			delete matchedState;
+
 			isRecognized = false;
 		}
 
-		/*for (i; i < line.length(); i++)
-		{*/
 			char letter = line[i];
 
 			//Case insensitive
@@ -440,7 +471,7 @@ bool MatchLine(Automata* automata, std::string line)
 					isRecognized = true;
 				}
 
-				alternativeRoutes.Add(new AlternativeRoute(i, currentState->Next()));
+				matchedStates.Add(new AlternativeRoute(i, currentState->Next()));
 			}
 
 			//Look for alternative matches
@@ -457,7 +488,7 @@ bool MatchLine(Automata* automata, std::string line)
 					stateSpecial == Whitespace && isspace(letter))
 				{
 
-					alternativeRoutes.Add(new AlternativeRoute(i, currentState));
+					matchedStates.Add(new AlternativeRoute(i, currentState));
 
 					if (currentState->IsFinal())
 					{
@@ -468,16 +499,14 @@ bool MatchLine(Automata* automata, std::string line)
 				currentState = currentState->Alternative();
 			}
 
-			//break;
-		//}
-
-		//If we're at the end of the line and the current state is recognized, we win!
+		//If we're at the end of the line and the current state is recognized,
+		//the line is recognized and no further lookin is necessary
 		if (isRecognized && i == line.length() - 1)
 		{
 			return true;
 		}
 
-	} while (!alternativeRoutes.IsEmpty());
+	} while (!matchedStates.IsEmpty());
 
 	return isRecognized;
 }
