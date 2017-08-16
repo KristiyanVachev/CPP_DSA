@@ -7,7 +7,7 @@
 *
 * @author Kristiyan Vachev
 * @idnumber 61905
-* @task Course Project
+* @task 0
 * @compiler VS
 *
 */
@@ -35,6 +35,7 @@ bool MatchLine(Automata* automata, std::string line);
 FileType CheckFileType(char* path);
 void MatchFile(Automata* automata, char* path, bool emptyRegEx);
 void MatchDirectory(Automata* automata, char* path, bool emptyRegEx);
+void FreeChunkMemory(DoublyLinkedList<InputChunk>* inputChunks);
 
 int main(char argc, char* argv[])
 {
@@ -166,7 +167,7 @@ DLNode<InputChunk>* Unite(DoublyLinkedList<InputChunk>* inputChunks, DLNode<Inpu
 	Automata* rightAutomata = currentNode->Next()->Value()->AutomataChunk();
 	if (rightAutomata == nullptr)
 	{
-		delete inputChunks;
+		FreeChunkMemory(inputChunks);
 		throw std::invalid_argument("Invalid union operation");
 	}
 
@@ -234,7 +235,7 @@ Automata* ConstructAutomata(std::string regEx)
 				type = AutomataChunk;
 				break;
 			default:
-				delete inputChunks;
+				FreeChunkMemory(inputChunks);
 				throw std::invalid_argument("Invalid symbol after \\");
 			}
 		}
@@ -250,7 +251,7 @@ Automata* ConstructAutomata(std::string regEx)
 				bracketPair = openBrackets.Pop();
 				if (bracketPair == nullptr)
 				{
-					delete inputChunks;
+					FreeChunkMemory(inputChunks);
 					throw std::invalid_argument("Closing bracket without an opening one.");
 				}
 				break;
@@ -270,7 +271,7 @@ Automata* ConstructAutomata(std::string regEx)
 			default:
 				if (letter < 33 || letter > 126)
 				{
-					delete inputChunks;
+					FreeChunkMemory(inputChunks);
 					throw std::invalid_argument("Unsupported symbol.");
 				}
 
@@ -334,7 +335,7 @@ Automata* ConstructAutomata(std::string regEx)
 			//If node after opening bracket isn't automata, invalid regex
 			if (currentNode->Next()->Value()->Type() == ClosingBracket || currentNode->Next()->Next()->Value()->Type() == ClosingBracket)
 			{
-				delete inputChunks;
+				FreeChunkMemory(inputChunks);
 				throw std::invalid_argument("Invalidly placed brackets.");
 			}
 
@@ -389,7 +390,7 @@ Automata* ConstructAutomata(std::string regEx)
 
 	if (inputChunks->Head()->Value()->Type() != AutomataChunk || inputChunks->Head()->Next() != nullptr)
 	{
-		delete inputChunks;
+		FreeChunkMemory(inputChunks);
 		throw std::invalid_argument("Invalid regEx");
 	}
 
@@ -565,4 +566,20 @@ void MatchDirectory(Automata* automata, char* path, bool emptyRegEx)
 
 		free(newPath);
 	}
+}
+
+void FreeChunkMemory(DoublyLinkedList<InputChunk>* inputChunks)
+{
+	DLNode<InputChunk>* currChunk = inputChunks->Head();
+	while (currChunk != nullptr)
+	{
+		if (currChunk->Value()->Type() == AutomataChunk)
+		{
+			delete currChunk->Value()->AutomataChunk();
+		}
+
+		currChunk = currChunk->Next();
+	}
+
+	delete inputChunks;
 }
