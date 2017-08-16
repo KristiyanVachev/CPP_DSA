@@ -145,6 +145,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AlternativeRoute.h" />
     <ClInclude Include="Automata\Automata.h" />
     <ClInclude Include="Automata\Specials.h" />
     <ClInclude Include="Automata\State.h" />

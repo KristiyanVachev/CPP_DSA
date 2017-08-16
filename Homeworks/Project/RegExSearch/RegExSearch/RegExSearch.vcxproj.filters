@@ -72,6 +72,9 @@
     <ClInclude Include="FileType.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="AlternativeRoute.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

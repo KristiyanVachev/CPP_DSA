@@ -2,12 +2,14 @@
 
 #include <string>
 #include <fstream>
-#include "iostream"
+#include <iostream>
 #include <stdexcept>
 
 
 #include "DoublyLinkedList/DoublyLinkedList.h"
 #include "InputChunk.h"
+
+#include "AlternativeRoute.h"
 
 #include <filesystem>
 #include "FileType.h"
@@ -29,7 +31,7 @@ int main(char argc, char* argv[])
 		path = argv[1];
 	}
 
-	string regEx = "(((A*).B).(\\\\|/))";
+	string regEx = "(((\\a*).B).(\\\\|/))";
 	if (argc > 2)
 	{
 		regEx = argv[2];
@@ -390,69 +392,92 @@ Automata* ConstructAutomata(std::string regEx)
 
 bool MatchLine(Automata* automata, std::string line)
 {
-	bool isRecognized;
+	Stack<AlternativeRoute> alternativeRoutes = Stack<AlternativeRoute>();
+
+	bool isRecognized = false;
 	State* currentState = automata->Start();
+	int i = 0;
 
-	for (char letter : line)
+	do
 	{
-		//Case insensitive
-		if (isalpha(letter))
+		//Get the new route from the stack every time except the first
+		if (!alternativeRoutes.IsEmpty())
 		{
-			letter = tolower(letter);
-		}
-
-		//No more matches for the remaining of the line
-		if (currentState->Next() == nullptr)
-		{
+			AlternativeRoute* lastNode = alternativeRoutes.Pop();
+			i = lastNode->Index() + 1;
+			currentState = lastNode->State();
 			isRecognized = false;
-			break;
 		}
 
-		//TODO test
-		Specials stateSpecial = currentState->Next()->Special();
-		char stateValue = currentState->Next()->Value();
+		/*for (i; i < line.length(); i++)
+		{*/
+			char letter = line[i];
 
-		//Character is recognized in the first next
-		if (stateSpecial == None && stateValue == letter ||
-			stateSpecial == AnyLetter && isalpha(stateValue) ||
-			stateSpecial == AnyDigit && isdigit(stateValue) ||
-			stateSpecial == Whitespace && isspace(stateValue))
-		{
-			currentState = currentState->Next();
-
-			if (currentState->IsFinal())
+			//Case insensitive
+			if (isalpha(letter))
 			{
-				isRecognized = true;
+				letter = tolower(letter);
 			}
 
-			continue;
-		}
-
-		//Look for alternative matches
-		//TODO save them in a stack and go trought them if primary is not matched
-		currentState = currentState->Next()->Alternative();
-
-		while (currentState != nullptr)
-		{
-			if (currentState->Value() == letter)
+			//No more states left, but line has not been gone trough
+			if (currentState->Next() == nullptr)
 			{
-				if (currentState->IsFinal())
+				isRecognized = false;
+				break;
+			}
+
+			Specials stateSpecial = currentState->Next()->Special();
+			char stateValue = currentState->Next()->Value();
+
+			//Character is recognized in the first next
+			if (stateSpecial == None && stateValue == letter ||
+				stateSpecial == AnyLetter && isalpha(letter) ||
+				stateSpecial == AnyDigit && isdigit(letter) ||
+				stateSpecial == Whitespace && isspace(letter))
+			{
+				if (currentState->Next()->IsFinal())
 				{
 					isRecognized = true;
 				}
 
-				break;;
+				alternativeRoutes.Add(new AlternativeRoute(i, currentState->Next()));
 			}
 
-			currentState = currentState->Alternative();
+			//Look for alternative matches
+			currentState = currentState->Next()->Alternative();
+
+			while (currentState != nullptr)
+			{
+				stateSpecial = currentState->Special();
+				stateValue = currentState->Value();
+
+				if (stateSpecial == None && stateValue == letter ||
+					stateSpecial == AnyLetter && isalpha(letter) ||
+					stateSpecial == AnyDigit && isdigit(letter) ||
+					stateSpecial == Whitespace && isspace(letter))
+				{
+
+					alternativeRoutes.Add(new AlternativeRoute(i, currentState));
+
+					if (currentState->IsFinal())
+					{
+						isRecognized = true;
+					}
+				}
+
+				currentState = currentState->Alternative();
+			}
+
+			//break;
+		//}
+
+		//If we're at the end of the line and the current state is recognized, we win!
+		if (isRecognized && i == line.length() - 1)
+		{
+			return true;
 		}
 
-		if (currentState == nullptr)
-		{
-			isRecognized = false;
-			break;;
-		}
-	}
+	} while (!alternativeRoutes.IsEmpty());
 
 	return isRecognized;
 }
