@@ -1,6 +1,8 @@
 #pragma once
 #include "Node.h"
 
+//Manually tested here - https://github.com/KristiyanVachev/CPP_DSA/blob/master/Exercises/LinkedList/LinkedList/main.cpp
+
 template <typename type> class LinkedList
 {
 private:

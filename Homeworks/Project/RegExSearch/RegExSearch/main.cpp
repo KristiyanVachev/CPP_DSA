@@ -73,7 +73,6 @@ int main(char argc, char* argv[])
 	catch (const std::invalid_argument& e)
 	{
 		std::cout << "RegEx error: " << e.what() << endl;
-		//TODO free other memory
 		return 1;
 	}
 
@@ -388,7 +387,11 @@ Automata* ConstructAutomata(std::string regEx)
 		}
 	}
 
-	//TODO check if there's only one chunk which is automata
+	if (inputChunks->Head()->Value()->Type() != AutomataChunk || inputChunks->Head()->Next() != nullptr)
+	{
+		delete inputChunks;
+		throw std::invalid_argument("Invalid regEx");
+	}
 
 	Automata* automata = inputChunks->Head()->Value()->AutomataChunk();
 	delete inputChunks;

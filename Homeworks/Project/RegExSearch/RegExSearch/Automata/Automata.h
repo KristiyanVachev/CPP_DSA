@@ -4,6 +4,8 @@
 #include "LinkedList/LinkedList.h"
 #include "Stack/Stack.h"
 
+//Unit-like tests for automata - https://github.com/KristiyanVachev/CPP_DSA/blob/master/Exercises/Automata/Automata/Automata/main.cpp
+
 class Automata
 {
 private:

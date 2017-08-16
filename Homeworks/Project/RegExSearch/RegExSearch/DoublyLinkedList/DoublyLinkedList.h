@@ -1,6 +1,8 @@
 #pragma once
 #include "DLNode.h"
 
+//Manually tested here - https://github.com/KristiyanVachev/CPP_DSA/blob/master/Exercises/DoublyLinkedList/DoublyLinkedList/DoublyLinkedList/main.cpp
+
 template <typename type> class DoublyLinkedList
 {
 private:
