@@ -4,3 +4,14 @@ ab\
 ab/
 aaaaaaaab\
 aaaaaaaab/
+123
+ 123 
+
+A
+AaAAa
+aaaaaaaaa
+abwx
+abyz
+cdwx
+cdyz
+a b

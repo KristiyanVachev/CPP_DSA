@@ -48,6 +48,13 @@ int main(char argc, char* argv[])
 		regEx = argv[2];
 	}
 
+	bool emptyRegEx = false;
+
+	if (regEx == "" || regEx == "\\e")
+	{
+		emptyRegEx = true;
+	}
+
 	FileType fileType = CheckFileType(path);
 
 	if (fileType == Other || fileType == Error)
@@ -63,7 +70,7 @@ int main(char argc, char* argv[])
 	}
 	catch (const std::invalid_argument& e)
 	{
-		std::cout << "RegEx error: " <<  e.what() << endl;
+		std::cout << "RegEx error: " << e.what() << endl;
 		//TODO free other memory
 		return 1;
 	}
@@ -74,12 +81,17 @@ int main(char argc, char* argv[])
 		ifstream infile(path);
 		string line;
 		int lineCount = 1;
-		
+
 		while (getline(infile, line))
 		{
-			bool isRecognized = MatchLine(automata, line);
+			bool isRecognized = false;
 
-			if (isRecognized)
+			if (!emptyRegEx)
+			{
+				isRecognized = MatchLine(automata, line);
+			}
+
+			if (emptyRegEx || isRecognized)
 			{
 				cout << path << ":" << lineCount << ":" << line << endl;
 			}
@@ -104,9 +116,14 @@ int main(char argc, char* argv[])
 
 				while (getline(infile, line))
 				{
-					bool isRecognized = MatchLine(automata, line);
+					bool isRecognized = false;
 
-					if (isRecognized)
+					if (!emptyRegEx)
+					{
+						isRecognized = MatchLine(automata, line);
+					}
+
+					if (emptyRegEx || isRecognized)
 					{
 						cout << file << ":" << lineCount << ":" << line << endl;
 					}
@@ -156,7 +173,8 @@ DLNode<InputChunk>* Concat(DoublyLinkedList<InputChunk>* inputChunks, DLNode<Inp
 	Automata* rightAutomata = currentNode->Next()->Value()->AutomataChunk();
 	if (rightAutomata == nullptr)
 	{
-		//error, not an automata
+		delete inputChunks;
+		throw std::invalid_argument("Invalid concatanation operation");
 	}
 
 	currentNode->Previous()->Value()->AutomataChunk()->ConcatAutomata(rightAutomata);
@@ -198,7 +216,8 @@ DLNode<InputChunk>* Unite(DoublyLinkedList<InputChunk>* inputChunks, DLNode<Inpu
 	Automata* rightAutomata = currentNode->Next()->Value()->AutomataChunk();
 	if (rightAutomata == nullptr)
 	{
-		//error, no automata
+		delete inputChunks;
+		throw std::invalid_argument("Invalid union operation");
 	}
 
 	currentNode->Previous()->Value()->AutomataChunk()->UniteAutomatas(rightAutomata);
@@ -217,6 +236,11 @@ DLNode<InputChunk>* Unite(DoublyLinkedList<InputChunk>* inputChunks, DLNode<Inpu
 
 Automata* ConstructAutomata(std::string regEx)
 {
+	if (regEx == "" || regEx == "\\e")
+	{
+		return  &Automata();
+	}
+
 	//Parsing the regex to chunks of either a bracket, automata of one or more simple characters or an operation sign
 	DoublyLinkedList<InputChunk>* inputChunks = new DoublyLinkedList<InputChunk>();
 
@@ -252,7 +276,8 @@ Automata* ConstructAutomata(std::string regEx)
 				special = AnyLetter;
 				break;
 			case 'e':
-				special = Empty;
+				special = None;
+				continue;
 				break;
 			case '\\':
 				special = None;
@@ -358,7 +383,7 @@ Automata* ConstructAutomata(std::string regEx)
 
 			//If node after opening bracket isn't automata, invalid regex
 			if (currentNode->Next()->Value()->Type() == ClosingBracket || currentNode->Next()->Next()->Value()->Type() == ClosingBracket)
-			{ 
+			{
 				delete inputChunks;
 				throw std::invalid_argument("Invalidly placed brackets.");
 			}
@@ -422,6 +447,11 @@ Automata* ConstructAutomata(std::string regEx)
 
 bool MatchLine(Automata* automata, std::string line)
 {
+	if (line == "")
+	{
+		return automata->Start()->IsFinal() ? true : false;
+	}
+
 	//Keeping every match in a stack, so that we don't miss any possible route
 	Stack<AlternativeRoute> matchedStates = Stack<AlternativeRoute>();
 
@@ -442,62 +472,62 @@ bool MatchLine(Automata* automata, std::string line)
 			isRecognized = false;
 		}
 
-			char letter = line[i];
+		char letter = line[i];
 
-			//Case insensitive
-			if (isalpha(letter))
+		//Case insensitive
+		if (isalpha(letter))
+		{
+			letter = tolower(letter);
+		}
+
+		//No more states left, but line has not been gone trough
+		if (currentState->Next() == nullptr)
+		{
+			isRecognized = false;
+			break;
+		}
+
+		Specials stateSpecial = currentState->Next()->Special();
+		char stateValue = currentState->Next()->Value();
+
+		//Character is recognized in the first next
+		if (stateSpecial == None && stateValue == letter ||
+			stateSpecial == AnyLetter && isalpha(letter) ||
+			stateSpecial == AnyDigit && isdigit(letter) ||
+			stateSpecial == Whitespace && isspace(letter))
+		{
+			if (currentState->Next()->IsFinal())
 			{
-				letter = tolower(letter);
+				isRecognized = true;
 			}
 
-			//No more states left, but line has not been gone trough
-			if (currentState->Next() == nullptr)
-			{
-				isRecognized = false;
-				break;
-			}
+			matchedStates.Add(new AlternativeRoute(i, currentState->Next()));
+		}
 
-			Specials stateSpecial = currentState->Next()->Special();
-			char stateValue = currentState->Next()->Value();
+		//Look for alternative matches
+		currentState = currentState->Next()->Alternative();
 
-			//Character is recognized in the first next
+		while (currentState != nullptr)
+		{
+			stateSpecial = currentState->Special();
+			stateValue = currentState->Value();
+
 			if (stateSpecial == None && stateValue == letter ||
 				stateSpecial == AnyLetter && isalpha(letter) ||
 				stateSpecial == AnyDigit && isdigit(letter) ||
 				stateSpecial == Whitespace && isspace(letter))
 			{
-				if (currentState->Next()->IsFinal())
+
+				matchedStates.Add(new AlternativeRoute(i, currentState));
+
+				if (currentState->IsFinal())
 				{
 					isRecognized = true;
 				}
-
-				matchedStates.Add(new AlternativeRoute(i, currentState->Next()));
 			}
 
-			//Look for alternative matches
-			currentState = currentState->Next()->Alternative();
-
-			while (currentState != nullptr)
-			{
-				stateSpecial = currentState->Special();
-				stateValue = currentState->Value();
-
-				if (stateSpecial == None && stateValue == letter ||
-					stateSpecial == AnyLetter && isalpha(letter) ||
-					stateSpecial == AnyDigit && isdigit(letter) ||
-					stateSpecial == Whitespace && isspace(letter))
-				{
-
-					matchedStates.Add(new AlternativeRoute(i, currentState));
-
-					if (currentState->IsFinal())
-					{
-						isRecognized = true;
-					}
-				}
-
-				currentState = currentState->Alternative();
-			}
+			currentState = currentState->Alternative();
+		}
 
 		//If we're at the end of the line and the current state is recognized,
 		//the line is recognized and no further lookin is necessary
