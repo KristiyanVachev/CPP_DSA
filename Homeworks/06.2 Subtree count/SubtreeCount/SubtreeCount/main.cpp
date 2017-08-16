@@ -64,7 +64,7 @@ int main(char argc, char* argv[])
 
 	std::cout << "Subtrees with " << n << " elements: " << subTrees <<std::endl;
 
-	//Rewrite the same file with the save values?
+	//No need to rewrite the file, because it already has the exact values to generate the same tree.
 
 	return 0;
 }

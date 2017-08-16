@@ -1,5 +1,7 @@
 #pragma once
 
+//Manual tests for dynamic array - https://github.com/KristiyanVachev/CPP_DSA/blob/master/Exercises/DynamicArray/DynamicArray/DynamicArray/main.cpp
+
 class DynamicArray
 {
 private:
