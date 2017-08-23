@@ -12,6 +12,7 @@ public:
 
 	void SetNext(Node* next);
 	void SetMultiplier(int newMupltiplier);
+	void IncreaseMultiplier();
 
 	Node* Next();
 	char Char();

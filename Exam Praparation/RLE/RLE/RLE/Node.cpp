@@ -23,6 +23,11 @@ void Node::SetMultiplier(int newMupltiplier)
 	this->_multiplier = newMupltiplier;
 }
 
+void Node::IncreaseMultiplier()
+{
+	this->_multiplier++;
+}
+
 Node* Node::Next()
 {
 	return this->_next;
