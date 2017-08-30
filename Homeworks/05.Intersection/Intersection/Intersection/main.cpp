@@ -116,10 +116,8 @@ int main()
 
 bool IsFile(std::string fileName)
 {
-	char* path = _strdup(fileName.c_str());
-
 	struct stat s;
-	if (stat(path, &s) == 0)
+	if (stat(fileName.c_str(), &s) == 0)
 	{
 		if (s.st_mode & S_IFDIR)
 		{
