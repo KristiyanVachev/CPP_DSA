@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include <iostream>
-
+#include <sstream>
+#include <fstream>
+#include <string>
 #include "DynamicArray.h"
 
 using namespace std;
@@ -16,6 +18,7 @@ int main()
 
 	for (int i = 0; i < arr.Lenght(); i++)
 	{
-		cout << arr.Data()[i] << endl;
+		cout << arr[i] << endl;
 	}
+	
 }

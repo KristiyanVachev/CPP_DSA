@@ -11,6 +11,7 @@ private:
 public:
 	DynamicArray();
 	~DynamicArray();
+	int operator[](int i);
 
 	void Add(int element);
 	int Lenght();

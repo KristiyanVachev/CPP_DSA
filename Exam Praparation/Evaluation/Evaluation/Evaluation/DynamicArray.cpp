@@ -32,6 +32,12 @@ DynamicArray::DynamicArray()
 
 DynamicArray::~DynamicArray()
 {
+	delete[] this->_data;
+}
+
+int DynamicArray::operator[](int i)
+{
+	return this->Data()[i];
 }
 
 void DynamicArray::Add(int element)
